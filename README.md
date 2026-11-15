@@ -3,6 +3,10 @@
 Find where an image appears online, look for similar images, or identify a
 product using multiple reverse image search providers.
 
+**[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/reverse-image-search-tool/hccicgceahocikgncfihpmkjamfpacpg)**
+
+## What’s in the v2.0 source
+
 Click the toolbar icon to open the search workspace. Choose, paste, or drop an
 image, or enter a direct image link. In supported desktop sidebars you can
 capture an area of the active page. Preview the image, choose your engines,
@@ -10,6 +14,8 @@ and click **Search image**. Right-click a webpage image for a direct search.
 
 New installations enable and select Google Lens, Bing, Yandex, and TinEye.
 Settings also offers Baidu, Sogou, Pinterest, SauceNAO, SHEIN, and Wildberries.
+
+See the [changelog](CHANGELOG.md) for version details.
 
 ## Build and test
 
