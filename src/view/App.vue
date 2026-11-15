@@ -1,80 +1,54 @@
 <template>
   <vn-app v-if="dataLoaded">
-    <div class="view-content" v-if="previewImage && !showError">
-      <div class="image-header">
-        <div class="image-url-container" v-if="previewImage.imageUrl">
-          <a
-            class="image-url-link"
-            :href="previewImage.imageUrl"
-            :title="previewImage.imageFilename"
-            >{{ previewImage.imageUrl }}</a
-          >
-
-          <vn-icon-button
-            src="/src/assets/icons/misc/content-copy.svg"
-            :title="getText('buttonTooltip_copyImageUrl')"
-            @click="copyImageUrl"
-          ></vn-icon-button>
+    <main v-if="previewImage && !showError" class="view-content">
+      <header class="image-header">
+        <div class="image-identity">
+          <h1>{{ previewImage.imageFilename || getText('pageTitle_view') }}</h1>
+          <p class="image-data" v-if="imageLoaded && imageDetails.length">
+            {{ imageDetails.map(detail => detail.text).join(' · ') }}
+          </p>
         </div>
-
-        <div class="image-details-container">
-          <div class="image-name-text">{{ previewImage.imageFilename }}</div>
-
-          <div class="image-data-container" v-if="imageLoaded">
-            <template v-for="(detail, index) in imageDetails" :key="index">
-              <div class="image-data-separator" v-if="index">•</div>
-              <div :class="{[`image-${detail.kind}-text`]: true}">
-                {{ detail.text }}
-              </div>
-            </template>
-          </div>
+        <div v-if="previewImage.imageUrl" class="image-link-actions">
+          <a class="ui-button ui-link" :href="previewImage.imageUrl" :title="previewImage.imageUrl">{{ getText('buttonLabel_openOriginal') }}</a>
+          <button type="button" class="ui-button" @click="copyImageUrl">{{ getText('buttonLabel_copyLink') }}</button>
         </div>
-      </div>
+        <p v-if="previewImage.imageUrl" class="copy-status" :class="{'is-error': copyFailed}" role="status">{{ copyStatus }}</p>
+      </header>
 
-      <picture class="image-preview">
-        <source
-          :srcset="previewImage.imageDataUrl"
-          :type="previewImage.imageType"
-        />
+      <picture v-show="!previewUnavailable" class="image-preview">
+        <source :srcset="previewImage.imageDataUrl" :type="previewImage.imageType" />
         <img
           class="image"
-          :src="`/src/assets/icons/misc/${
-            theme === 'dark' ? 'broken-image-dark' : 'broken-image'
-          }.svg`"
+          :src="previewImage.imageDataUrl"
           @error.once="onPreviewImageError"
           @load="onPreviewImageLoad"
-          :alt="previewImage.imageFilename"
+          :alt="previewImage.imageFilename || getText('pageTitle_view')"
         />
       </picture>
-    </div>
+      <p v-if="previewUnavailable" class="image-preview-notice" role="status">{{ getText('status_previewUnavailable') }}</p>
+    </main>
 
-    <div class="error-content" v-if="showError">
-      <vn-icon
-        class="error-icon"
-        src="/src/assets/icons/misc/error.svg"
-      ></vn-icon>
-      <div class="error-text">{{ showError }}</div>
-    </div>
+    <main v-else-if="showError" class="error-content">
+      <h1>{{ getText('pageTitle_view') }}</h1>
+      <p role="status">{{ showError }}</p>
+    </main>
   </vn-app>
 </template>
 
 <script>
-import {App, Icon, IconButton} from 'vueton';
+import {App} from 'vueton';
 
 import {
   validateId,
   getFormattedImageDetails,
   isPreviewImageValid,
-  sendLargeMessage,
-  getAppTheme
+  sendLargeMessage
 } from 'utils/app';
 import {getText} from 'utils/common';
 
 export default {
   components: {
-    [App.name]: App,
-    [Icon.name]: Icon,
-    [IconButton.name]: IconButton
+    [App.name]: App
   },
 
   data: function () {
@@ -86,7 +60,9 @@ export default {
       imageDetails: [],
       imageLoaded: false,
 
-      theme: ''
+      previewUnavailable: false,
+      copyStatus: '',
+      copyFailed: false
     };
   },
 
@@ -106,6 +82,7 @@ export default {
     },
 
     setup: async function () {
+      document.documentElement.lang = browser.i18n.getUILanguage() || 'en';
       const storageId = new URL(window.location.href).searchParams.get('id');
 
       if (validateId(storageId)) {
@@ -133,23 +110,14 @@ export default {
       } else {
         this.showError = getText('error_invalidPageUrl');
       }
-
-      this.theme = await getAppTheme();
-      document.addEventListener('themeChange', ev => {
-        this.theme = ev.detail;
-      });
     },
 
     onPreviewImageLoad: function () {
       this.setPreviewImageLoaded();
     },
 
-    onPreviewImageError: function (ev) {
-      const source = ev.target.previousElementSibling;
-      source.srcset = ev.target.src;
-      source.type = 'image/svg+xml';
-
-      this.setPreviewImageLoaded();
+    onPreviewImageError: function () {
+      this.previewUnavailable = true;
     },
 
     setPreviewImageLoaded: function () {
@@ -179,7 +147,14 @@ export default {
     },
 
     copyImageUrl: async function () {
-      await navigator.clipboard.writeText(this.previewImage.imageUrl);
+      try {
+        await navigator.clipboard.writeText(this.previewImage.imageUrl);
+        this.copyFailed = false;
+        this.copyStatus = getText('status_imageLinkCopied');
+      } catch {
+        this.copyFailed = true;
+        this.copyStatus = getText('error_copyImageLink');
+      }
     }
   },
 
@@ -193,181 +168,49 @@ export default {
 @use 'vueton/styles' as vueton;
 
 @include vueton.theme-base;
-@include vueton.transitions;
 
-html,
-body,
-.vn-app,
-.v-application__wrap {
-  width: 100%;
-  height: 100%;
+html, body, .vn-app, .v-application__wrap {min-height: 100%}
+.vn-app {background: var(--ui-bg); color: var(--ui-text)}
+.view-content, .error-content {
+  box-sizing: border-box;
+  padding: 20px;
+  font: 14px/1.4 var(--ui-font);
 }
-
-.v-application__wrap {
-  display: flex;
-  justify-content: center;
-  flex-direction: row;
-}
-
 .view-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-sizing: border-box;
-  padding-top: 24px;
-  padding-bottom: 24px;
-  padding-left: 16px;
-  padding-right: 16px;
-  width: 100%;
-  height: 100%;
-
-  & .image-header {
-    display: flex;
-    flex-direction: column;
-    row-gap: 4px;
-    margin-bottom: 24px;
-    padding-top: 16px;
-    padding-bottom: 16px;
-    padding-left: 24px;
-    padding-right: 12px;
-    box-sizing: border-box;
-    max-width: min(960px, 100%);
-
-    background-color: #fff;
-    border-radius: 16px;
-
-    @include vueton.md2-typography(subtitle1);
-    font-size: 14px;
-
-    & .image-url-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      column-gap: 16px;
-      width: 100%;
-      height: 32px;
-
-      & .image-url-link {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        font-weight: 500;
-        color: rgb(0, 102, 204);
-        text-decoration: none;
-      }
-
-      & .image-url-link:hover,
-      & .image-url-link:active {
-        color: rgb(0, 82, 164);
-      }
-    }
-
-    & .image-details-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      column-gap: 32px;
-      width: 100%;
-      height: 32px;
-
-      & .image-name-text {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-
-        display: none;
-      }
-
-      & .image-data-container {
-        display: flex;
-        align-items: center;
-        column-gap: 8px;
-        padding-right: 12px;
-        width: 100%;
-
-        & .image-dimension-text,
-        & .image-size-text,
-        & .image-type-text,
-        & .image-data-separator {
-          white-space: nowrap;
-        }
-
-        & .image-type-text {
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      }
-    }
-  }
-
-  & .image-preview {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: calc(100% - 124px);
-
-    & .image {
-      object-fit: scale-down;
-      max-width: 100%;
-      max-height: 100%;
-    }
-  }
+  gap: 16px;
+  height: 100dvh;
 }
-
-.error-content {
+.image-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  padding: 16px;
-
-  & .error-icon {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
-    margin-right: 24px;
-    @include vueton.theme-prop(background-color, error);
-  }
-
-  & .error-text {
-    @include vueton.md2-typography(subtitle1);
-    max-width: 520px;
-  }
+  justify-content: space-between;
+  gap: 6px 16px;
+  width: min(960px, 100%);
+  padding: 12px 16px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-surface-radius);
+  background: var(--ui-surface);
 }
+.image-identity {flex: 1 1 14rem; min-width: 0}
+.image-header h1, .error-content h1 {margin: 0; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere}
+.image-data, .copy-status, .image-preview-notice {margin: 0; color: var(--ui-muted); font-size: 12px}
+.image-data {margin-top: 4px}
+.image-link-actions {display: flex; flex-wrap: wrap; gap: 4px}
+.copy-status {flex-basis: 100%}
+.copy-status:empty {position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%)}
+.copy-status.is-error, .error-content p {color: var(--ui-notice)}
+.image-preview {display: flex; flex: 1; align-items: center; justify-content: center; width: 100%; min-height: 0}
+.image-preview .image {display: block; object-fit: contain; max-width: 100%; max-height: 100%}
+.image-preview-notice {margin: auto; font-size: 14px}
+.error-content {max-width: 580px; margin: auto}
+.error-content p {margin: 8px 0 0}
 
-.v-theme--light {
-  & .v-application__wrap {
-    background-color: var(--md-ref-palette-color5-1);
-  }
-}
-
-.v-theme--dark {
-  & .v-application__wrap {
-    & .image-header {
-      @include vueton.theme-prop(background-color, menu-surface);
-
-      & .image-url-container {
-        & .image-url-link {
-          color: rgb(76, 164, 252);
-        }
-
-        & .image-url-link:hover,
-        & .image-url-link:active {
-          color: rgb(106, 180, 254);
-        }
-      }
-    }
-  }
-}
-
-/* tablets */
-@media (min-width: 480px) {
-  .image-name-text {
-    display: initial !important;
-  }
-
-  .image-data-container {
-    width: initial !important;
-  }
+@media (max-width: 380px) {
+  .view-content {padding: 12px}
+  .image-header {padding: 10px 12px}
 }
 </style>

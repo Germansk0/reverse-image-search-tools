@@ -25,8 +25,8 @@ async function search({session, search, image, storageIds} = {}) {
 }
 
 async function engineAccess() {
-  if (document.title.toLowerCase() === 'access denied') {
-    return false;
+  if (/access denied|security filter flagged/i.test(document.title)) {
+    return 'error_engineAccessDenied';
   }
 
   return true;

@@ -1,0 +1,11 @@
+Reverse Image Search Tools
+
+This software incorporates modified code from Search by Image.
+Copyright (c) 2017-2026 Armin Sebastian.
+
+Reverse Image Search Tools modifications include the shared side-panel
+workflow, browser packaging, search adapters, settings, and test coverage.
+This modified version includes changes through November 15, 2026.
+
+This software is distributed under the GNU General Public License,
+version 3. See LICENSE for the full terms.

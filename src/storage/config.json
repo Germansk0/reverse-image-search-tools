@@ -61,7 +61,9 @@
       "20250413115022_add_unsplash",
       "20250511143502_remove_karma_decay",
       "20251003185932_add_vcg",
-      "20251203085001_add_yandexhost"
+      "20251203085001_add_yandexhost",
+      "20261112000000_group_chrome_context_menu",
+      "20261112000001_remove_lenso"
     ],
     "session": [
       "20240514122825_initial_version"

@@ -31,13 +31,18 @@ async function ensureStorageReady({area = 'local'} = {}) {
       let stop;
 
       const checkStorage = async function () {
-        if (await isStorageReady({area})) {
+        try {
+          if (await isStorageReady({area})) {
+            self.clearTimeout(timeoutId);
+            resolve();
+          } else if (stop) {
+            reject(new Error(`Storage (${area}) is not ready`));
+          } else {
+            self.setTimeout(checkStorage, 30);
+          }
+        } catch (error) {
           self.clearTimeout(timeoutId);
-          resolve();
-        } else if (stop) {
-          reject(new Error(`Storage (${area}) is not ready`));
-        } else {
-          self.setTimeout(checkStorage, 30);
+          reject(error);
         }
       };
 

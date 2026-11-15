@@ -1,8 +1,10 @@
 <template>
   <vn-app>
     <vn-dialog
+      class="ui-dialog"
       v-model="showDialog"
       content-class="confirmation-dialog__content"
+      :aria-label="getText('dialogTitle_imageConfirmation')"
       transition="scale-transition"
       scrollable
       persistent
@@ -12,16 +14,14 @@
           getText('dialogTitle_imageConfirmation')
         }}</vn-card-title>
 
-        <vn-divider :class="separatorClasses"></vn-divider>
-
         <vn-card-text tabindex="-1">
           <div class="preview-images">
-            <div
-              class="tile-container"
-              tabindex="0"
+            <button
+              class="tile-container ui-focus"
+              type="button"
               :data-index="index"
+              :aria-label="img.image.imageFilename ? undefined : getText('buttonLabel_selectImageNumber', [String(index + 1)])"
               @click="onSelection"
-              @keyup.enter="onSelection"
               v-for="(img, index) in previewImages"
               :key="index"
             >
@@ -41,16 +41,16 @@
                 />
               </picture>
 
-              <div class="image-details" v-if="imagesLoaded">
+              <span class="image-details" v-if="imagesLoaded">
                 <template
                   v-if="
-                    largestImageDimension &&
+                    imageSizesDiffer &&
                     (img.imageWidth === largestImageWidth ||
                       img.imageHeight === largestImageHeight ||
                       img.imageDimension === largestImageDimension)
                   "
                 >
-                  <div class="image-dimension-icon-container">
+                  <span class="image-dimension-icon-container">
                     <vn-icon
                       class="image-dimension-icon"
                       src="/src/assets/icons/misc/swap-horiz.svg"
@@ -75,8 +75,8 @@
                       :title="getText('pageContent_largest_image')"
                       v-if="img.imageDimension === largestImageDimension"
                     ></vn-icon>
-                  </div>
-                  <div class="image-data-separator">•</div>
+                  </span>
+                  <span class="image-data-separator">•</span>
                 </template>
 
                 <template
@@ -85,22 +85,20 @@
                   )"
                   :key="detailIndex"
                 >
-                  <div class="image-data-separator" v-if="detailIndex">•</div>
-                  <div :class="{[`image-${detail.kind}-text`]: true}">
+                  <span class="image-data-separator" v-if="detailIndex">•</span>
+                  <span :class="{[`image-${detail.kind}-text`]: true}">
                     {{ detail.text }}
-                  </div>
+                  </span>
                 </template>
-              </div>
-            </div>
+              </span>
+            </button>
           </div>
         </vn-card-text>
 
-        <vn-divider :class="separatorClasses"></vn-divider>
-
         <vn-card-actions>
-          <vn-button @click="onCancel" variant="tonal">
+          <button type="button" class="ui-button ui-quiet" @click="onCancel">
             {{ getText('buttonLabel_cancel') }}
-          </vn-button>
+          </button>
         </vn-card-actions>
       </vn-card>
     </vn-dialog>
@@ -111,13 +109,11 @@
 import {markRaw} from 'vue';
 import {
   App,
-  Button,
   Card,
   CardActions,
   CardText,
   CardTitle,
   Dialog,
-  Divider,
   Icon
 } from 'vueton';
 
@@ -135,20 +131,17 @@ import {getText} from 'utils/common';
 export default {
   components: {
     [App.name]: App,
-    [Button.name]: Button,
     [Card.name]: Card,
     [CardActions.name]: CardActions,
     [CardText.name]: CardText,
     [CardTitle.name]: CardTitle,
     [Dialog.name]: Dialog,
-    [Divider.name]: Divider,
     [Icon.name]: Icon
   },
 
   data: function () {
     return {
       showDialog: false,
-      hasScrollBar: false,
 
       previewImages: [],
 
@@ -165,10 +158,11 @@ export default {
   },
 
   computed: {
-    separatorClasses: function () {
-      return {
-        visible: this.hasScrollBar
-      };
+    imageSizesDiffer: function () {
+      const images = this.previewImages.filter(image => image.imageDimension);
+      return images.some(image =>
+        image.imageWidth !== images[0].imageWidth || image.imageHeight !== images[0].imageHeight
+      );
     }
   },
 
@@ -310,7 +304,11 @@ export default {
           : '.tile-container'
       );
 
-      window.setTimeout(() => node.focus(), 300);
+      window.setTimeout(() => {
+        if (this.showDialog && !document.activeElement?.matches('button, input, a[href]')) {
+          node?.focus();
+        }
+      }, 300);
     },
 
     openDialog: function () {
@@ -321,28 +319,16 @@ export default {
       this.showDialog = false;
     },
 
-    initResizeObservers: function () {
+    initSizeListener: function () {
       const mql = window.matchMedia('(min-width: 400px)');
       mql.addEventListener('change', this.setMinWidthViewport);
 
       this.setMinWidthViewport(mql);
 
-      const observer = new ResizeObserver(this.configureScrollBar);
-      const content = document.querySelector('.preview-images');
-      observer.observe(content);
-      observer.observe(content.parentNode);
-
-      this.configureScrollBar();
     },
 
     setMinWidthViewport: function (ev) {
       this.minWidthViewport = ev.matches;
-    },
-
-    configureScrollBar: function () {
-      const content = document.querySelector('.preview-images').parentNode;
-
-      this.hasScrollBar = content.scrollHeight > content.clientHeight;
     },
 
     setup: function (session, images) {
@@ -362,6 +348,8 @@ export default {
     },
 
     init: async function () {
+      document.title = getText('dialogTitle_imageConfirmation');
+      document.documentElement.lang = browser.i18n.getUILanguage() || 'en';
       if (this.$env.isFirefox) {
         browser.runtime.onMessage.addListener(this.onMessage);
 
@@ -412,7 +400,7 @@ export default {
       window.addEventListener(
         'keydown',
         ev => {
-          if (ev.key === 'Escape') {
+          if (ev.key === 'Escape' && this.showDialog) {
             ev.preventDefault();
             ev.stopImmediatePropagation();
 
@@ -422,7 +410,7 @@ export default {
         {capture: true, passive: false}
       );
 
-      this.initResizeObservers();
+      this.initSizeListener();
     }
   },
 
@@ -447,37 +435,9 @@ export default {
     transform-origin: center center !important;
 
     width: initial !important;
-    max-width: initial !important;
+    max-width: calc(100% - 24px) !important;
     max-height: calc(100% - 32px) !important;
 
-    & .vn-card {
-      @include vueton.theme-prop(background-color, menu-surface);
-
-      & .vn-divider {
-        opacity: 0;
-        transition: none;
-      }
-
-      & .vn-card-title {
-        padding-bottom: 16px !important;
-      }
-
-      & .vn-card-text {
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
-      }
-
-      & .vn-card-actions {
-        padding-top: 16px !important;
-        padding-bottom: 16px !important;
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-
-        & .vn-button {
-          @include vueton.theme-prop(color, primary);
-        }
-      }
-    }
   }
 }
 
@@ -499,44 +459,32 @@ export default {
 }
 
 .tile-container {
-  width: 248px;
+  display: block;
+  width: min(248px, 100%);
   height: 226px;
   @media (min-width: 400px) {
-    width: 320px;
+    width: min(320px, 100%);
     height: 280px;
   }
   padding: 16px;
+  border: 0;
+  border-radius: var(--ui-control-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
   box-sizing: border-box;
   position: relative;
   cursor: pointer;
   z-index: 1;
 }
 
-.tile-container:focus {
-  outline: 0;
+.tile-container:focus-visible {
+  outline-offset: -2px;
 }
 
-.tile-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  @include vueton.theme-prop(background-color, surface-variant);
-  border-radius: 16px;
-  transition: all 0.2s ease;
-  transform: scale(0.96);
-  opacity: 0;
-}
-
-.tile-container:focus::before,
-.tile-container:hover::before {
-  transform: scale(1);
-  opacity: 1;
+.tile-container:focus-visible,
+.tile-container:hover {
+  background: var(--ui-subtle);
 }
 
 .image-container {
@@ -584,7 +532,8 @@ export default {
 .image-size-text,
 .image-type-text,
 .image-data-separator {
-  @include vueton.md2-typography(caption);
+  color: var(--ui-muted);
+  font: 12px/1.35 var(--ui-font);
   white-space: nowrap;
 }
 

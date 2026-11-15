@@ -26,8 +26,8 @@ async function search({session, search, image, storageIds} = {}) {
 }
 
 async function engineAccess() {
-  if (document.title.toLowerCase().includes('security')) {
-    return false;
+  if (/security|安全验证/i.test(document.title)) {
+    return 'error_engineVerification';
   }
 
   return true;

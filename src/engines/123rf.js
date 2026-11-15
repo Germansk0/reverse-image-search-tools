@@ -1,20 +1,40 @@
 import {validateUrl} from 'utils/app';
-import {runOnce} from 'utils/common';
+import {findNode, runOnce} from 'utils/common';
 import {
   initSearch,
   prepareImageForUpload,
   sendReceipt,
+  setFileInputData,
   getValidHostname
 } from 'utils/engines';
 
 const engine = '123rf';
 
-async function search({session, search, image, storageIds} = {}) {
+async function search({image, storageIds} = {}) {
+  const uploadButton = await findNode('#desktop-search-bar-reverseSearch-btn', {
+    timeout: 5000,
+    throwError: false
+  });
   image = await prepareImageForUpload({
     image,
     engine,
-    target: 'api'
+    target: uploadButton ? 'ui' : 'api'
   });
+
+  if (uploadButton) {
+    uploadButton.click();
+    const inputSelector = 'input#searchbar-draganddrop-input';
+    const input = await findNode(inputSelector);
+    await setFileInputData(inputSelector, input, image);
+    input.dispatchEvent(new Event('input', {bubbles: true, composed: true}));
+    input.dispatchEvent(new Event('change', {bubbles: true}));
+
+    // Let the adapter in the regional page pick up the task after a redirect.
+    window.setTimeout(() => {
+      sendReceipt(storageIds).catch(() => {});
+    }, 5000);
+    return;
+  }
 
   const data = new FormData();
   data.append('image_base64', image.imageDataUrl);
@@ -46,7 +66,10 @@ async function search({session, search, image, storageIds} = {}) {
 }
 
 async function engineAccess() {
-  if (document.querySelector('h1')?.textContent.toLowerCase() === '403 error') {
+  if (
+    /^\/reverse-search(?:\/|$)/.test(window.location.pathname) ||
+    document.querySelector('h1')?.textContent.toLowerCase() === '403 error'
+  ) {
     return false;
   }
 

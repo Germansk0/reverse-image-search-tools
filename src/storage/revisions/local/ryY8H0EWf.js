@@ -1,13 +1,9 @@
-const message = 'Add contribPageLastOpen';
+const message = 'Retain storage revision compatibility';
 
 const revision = 'ryY8H0EWf';
 
 async function upgrade() {
-  const changes = {};
-  changes.contribPageLastOpen = 0;
-
-  changes.storageVersion = revision;
-  return browser.storage.local.set(changes);
+  return browser.storage.local.set({storageVersion: revision});
 }
 
 export {message, revision, upgrade};

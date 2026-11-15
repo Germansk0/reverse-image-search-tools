@@ -1,5 +1,5 @@
-import {findNode, processNode, runOnce} from 'utils/common';
-import {setFileInputData, initSearch, sendReceipt} from 'utils/engines';
+import {findNode, getText, processNode, runOnce} from 'utils/common';
+import {EngineError, initSearch, sendReceipt, setFileInputData, showEngineError} from 'utils/engines';
 
 const engine = 'ikea';
 
@@ -9,7 +9,23 @@ async function search({session, search, image, storageIds} = {}) {
     throwError: false
   });
 
-  (await findNode('#search-box-visual-search-icon')).click();
+  const cameraSelector = '#search-box-visual-search-icon';
+  if (
+    !document.querySelector(cameraSelector)?.getClientRects().length &&
+    document.querySelector('#onetrust-accept-btn-handler')?.getClientRects().length
+  ) {
+    showEngineError({errorId: 'error_ikeaCookieChoice', engine});
+  }
+
+  const camera = await findNode(cameraSelector, {
+    throwError: false,
+    observerOptions: {attributes: true},
+    validateFn: node => node.getClientRects().length > 0
+  });
+  if (!camera) {
+    throw new EngineError(getText('error_ikeaCameraUnavailable'));
+  }
+  camera.click();
 
   const inputSelector = 'input[type=file]';
   const input = await findNode(inputSelector);

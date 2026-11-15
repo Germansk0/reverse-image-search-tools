@@ -12,7 +12,8 @@ const contentStorage = {
   viewFrame: null,
   viewFrameId: 0,
   viewMessagePort: null,
-  queuedMessage: null
+  queuedMessage: null,
+  captureRequestId: null
 };
 
 function addViewFrame() {
@@ -70,8 +71,10 @@ function showView(view) {
 }
 
 function hideView(view) {
+  const captureRequestId = contentStorage.captureRequestId;
   window.setTimeout(function () {
-    if (contentStorage.viewFrame.id === view) {
+    if (contentStorage.viewFrame.id === view &&
+        (view !== 'capture' || captureRequestId === contentStorage.captureRequestId)) {
       contentStorage.viewFrame.classList.add('hidden');
       document.body.focus();
     }
@@ -123,11 +126,13 @@ async function messageView(message) {
 
 async function processMessage(request, sender) {
   if (request.id === 'openView') {
+    contentStorage.captureRequestId = request.session?.captureRequestId;
     showView(request.view);
     await messageView(request);
   } else if (request.id === 'closeView') {
+    if (request.captureRequestId && request.captureRequestId !== contentStorage.captureRequestId) return;
     if (request.messageView) {
-      await messageView({id: request.id});
+      await messageView({id: request.id, captureRequestId: request.captureRequestId});
     }
     hideView(request.view);
   } else if (request.id === 'messageView') {

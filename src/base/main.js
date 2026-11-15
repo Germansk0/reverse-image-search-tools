@@ -1,5 +1,4 @@
 import storage from 'storage/storage';
-import {isIncomingShareContext, processIncomingShare} from 'utils/app';
 import {runOnce} from 'utils/common';
 
 function main() {
@@ -142,11 +141,7 @@ function main() {
   }
 
   if (window.top === window) {
-    if (isIncomingShareContext()) {
-      processIncomingShare();
-    } else {
-      checkTask();
-    }
+    checkTask();
   }
 }
 

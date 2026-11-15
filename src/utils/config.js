@@ -1,8 +1,7 @@
 const targetEnv = process.env.TARGET_ENV;
 
-const enableContributions = process.env.ENABLE_CONTRIBUTIONS === 'true';
+const releaseBuild = process.env.RELEASE_BUILD === true;
 
-const enableSponsors = process.env.ENABLE_SPONSORS === 'true';
 
 const storageRevisions = {
   local: process.env.STORAGE_REVISION_LOCAL,
@@ -15,8 +14,7 @@ const mv3 = process.env.MV3 === 'true';
 
 export {
   targetEnv,
-  enableContributions,
-  enableSponsors,
+  releaseBuild,
   storageRevisions,
   appVersion,
   mv3

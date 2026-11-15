@@ -6,6 +6,8 @@ import {VueLoaderPlugin} from 'vue-loader';
 import {VuetifyPlugin} from 'webpack-plugin-vuetify';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
+import {releaseEngines} from './src/utils/releaseEngines.js';
+
 const __dirname = import.meta.dirname;
 
 const {
@@ -15,9 +17,8 @@ const {
 export default async function (env, argv) {
   const targetEnv = process.env.TARGET_ENV || 'chrome';
   const isProduction = process.env.NODE_ENV === 'production';
-  const enableContributions =
-    (process.env.ENABLE_CONTRIBUTIONS || 'true') === 'true';
-  const enableSponsors = (process.env.ENABLE_SPONSORS || 'true') === 'true';
+  const releaseBuild =
+    isProduction || process.env.FULL_ENGINE_CATALOG !== 'true';
 
   const mv3 = env.mv3 === 'true';
   const appVersion = env.appVersion;
@@ -33,12 +34,11 @@ export default async function (env, argv) {
     new webpack.DefinePlugin({
       'process.env': {
         TARGET_ENV: JSON.stringify(targetEnv),
+        RELEASE_BUILD: JSON.stringify(releaseBuild),
         STORAGE_REVISION_LOCAL: JSON.stringify(storageRevisions.local.at(-1)),
         STORAGE_REVISION_SESSION: JSON.stringify(
           storageRevisions.session.at(-1)
         ),
-        ENABLE_CONTRIBUTIONS: JSON.stringify(enableContributions.toString()),
-        ENABLE_SPONSORS: JSON.stringify(enableSponsors.toString()),
         APP_VERSION: JSON.stringify(appVersion),
         MV3: JSON.stringify(mv3.toString())
       },
@@ -73,15 +73,13 @@ export default async function (env, argv) {
         }
       })
     )
-  ).filter(Boolean);
+  ).filter(engine =>
+    engine && (!releaseBuild || releaseEngines.includes(engine))
+  );
 
   const entries = Object.fromEntries(
     engines.map(engine => [engine, `./src/engines/${engine}.js`])
   );
-
-  if (enableContributions) {
-    entries.contribute = './src/contribute/main.js';
-  }
 
   return {
     mode: isProduction ? 'production' : 'development',
@@ -89,12 +87,11 @@ export default async function (env, argv) {
     entry: {
       background: './src/background/main.js',
       options: './src/options/main.js',
-      action: './src/action/main.js',
+      sidepanel: './src/sidepanel/main.js',
       select: './src/select/main.js',
       capture: './src/capture/main.js',
       confirm: './src/confirm/main.js',
       overlay: './src/overlay/main.js',
-      browse: './src/browse/main.js',
       search: './src/search/main.js',
       view: './src/view/main.js',
       base: './src/base/main.js',
@@ -123,15 +120,13 @@ export default async function (env, argv) {
             chunks: chunk => {
               return [
                 'options',
-                'action',
+                'sidepanel',
                 'select',
                 'capture',
                 'confirm',
                 'overlay',
-                'browse',
                 'search',
-                'view',
-                'contribute'
+                'view'
               ].includes(chunk.name);
             },
             minChunks: 2

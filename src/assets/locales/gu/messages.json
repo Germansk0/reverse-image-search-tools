@@ -1,0 +1,842 @@
+{
+  "storeDesc": {
+    "message": "Chromeના આ એક્સ્ટેંશનથી ફોટો દ્વારા શોધ કરો. ફોટાનો મૂળ સ્રોત શોધો, સ્ક્રીનશૉટમાંથી પ્રોડક્ટ ઓળખો અથવા સમાન છબીઓની સરખામણી કરો. Chromeની સાઇડ પેનલમાં કાપેલો ભાગ તપાસો અને પસંદ કરેલી શોધ સેવાઓને મોકલો.\n\n10 સર્ચ એન્જિન, 4 ડિફોલ્ટ રૂપે સક્ષમ\n✅ Google Lens, Bing Visual Search, Yandex Images, અને TinEye એક નવા ઇન્સ્ટોલ પર સક્ષમ અને પસંદ કરેલ છે.\n✅ તમારી પ્રથમ શોધ માટે છ વૈકલ્પિક પ્રદાતાઓમાંથી કોઈપણને સક્ષમ કરવા “Settings” ખોલો અને “Add engines” પસંદ કરો.\n✅ ભિન્ન અનુક્રમણિકા શોધવા માટે Baidu અથવા Sogou અજમાવી જુઓ, અથવા તેના સ્ત્રોત માટે ચિત્રને ટ્રેસ કરવા માટે SauceNAO નો ઉપયોગ કરો.\n✅ વિચારો માટે Pinterest અજમાવી જુઓ અને ફોટામાં આઇટમ જેવા દેખાતા ઉત્પાદનો માટે SHEIN અને Wildberries તપાસો.\n✅ શોધ એંજીન ચાલુ અથવા બંધ કરો અને તેમને “Settings” માં ફરીથી ગોઠવો. અપડેટ કર્યા પછી તમારી પસંદગીઓ ચાલુ રહે છે.\n✅ એક, અનેક અથવા બધા સક્ષમ એન્જિન પસંદ કરો. દરેક તેના પોતાના ટેબમાં પરિણામો ખોલે છે જેથી તમે તેમની સરખામણી કરી શકો.\n\nજમણા ક્લિકથી ફોટો દ્વારા શોધ\n⚡ વેબ પૃષ્ઠ પરની છબી પર જમણું-ક્લિક કરો અને તેને શોધવા માટે એક્સ્ટેંશન મેનૂમાંથી એન્જિન પસંદ કરો.\n⚡ સબમેનુમાંથી બધા સક્ષમ પ્રદાતાઓ સાથે સમાન લુકઅપ ચલાવવા માટે “All enabled engines” પસંદ કરો.\n⚡ લુકઅપ ચલાવતા પહેલા અલગ ટેબમાં ચિત્રનું જાતે જ નિરીક્ષણ કરવા “Open image” પસંદ કરો.\n⚡ નવા ઇન્સ્ટોલ પર, એક્સ્ટેંશન તમે ક્લિક કરેલ ફોટાની નજીકની છબીઓ અને કદ માટે જુએ છે.\n\nસ્ક્રીનશૉટથી ચિત્ર શોધો\n✂️ વર્તમાન પૃષ્ઠની બાજુમાં Chrome સાઇડ પેનલ ખોલવા માટે ટૂલબારમાં એક્સ્ટેંશન આઇકન પર ક્લિક કરો.\n✂️ “Capture area” પસંદ કરો અને દૃશ્યમાન પૃષ્ઠના ભાગની આસપાસ એક લંબચોરસ દોરો જે તમે તપાસવા માંગો છો.\n✂️ શોધવાની વસ્તુ પર ધ્યાન રહે તે માટે કૅપ્શન, મેનૂ અને બિનજરૂરી ભાગો કાપેલા વિસ્તારમાંથી બહાર રાખો.\n✂️ “Use capture” પસંદ કરો અને કાપેલા ભાગનું પૂર્વાવલોકન જુઓ. સર્ચ એન્જિન પસંદ કર્યા પછી “Search image” પર ક્લિક કરો.\n✂️ જો “Capture area” ખૂટે છે, તો તમે લીધેલો સ્ક્રીનશોટ પેસ્ટ કરો અથવા અપલોડ કરો અને તેને પેનલમાંથી શોધો.\n\nફોટો, ક્લિપબોર્ડ અથવા URL દ્વારા શોધો\n⬆️ સાચવેલી છબી અથવા સ્ક્રીનશૉટ ઉમેરવા માટે “Choose file” પર ક્લિક કરો. પૂર્વાવલોકન તપાસો અને તમે ઉપયોગ કરવા માંગો છો તે પ્રદાતાઓને પસંદ કરો.\n⬆️ બાજુની પેનલમાં ત્રણ જેટલી ફાઇલોને ખેંચો અને છોડો. તમે શોધ ચલાવો તે પહેલાં તેમની સમીક્ષા કરવા માટે થંબનેલ્સ પર ક્લિક કરો.\n⬆️ તમારા ક્લિપબોર્ડ પરથી કૉપિ કરેલી છબી અથવા સીધી લિંક પેસ્ટ કરો. “Paste” બટન તમારા ક્લિપબોર્ડની ઍક્સેસ માટે પૂછી શકે છે.\n⬆️ “Image link” માં સીધું HTTP અથવા HTTPS સરનામું દાખલ કરો, પછી તે યોગ્ય ચિત્ર છે તેની ખાતરી કરવા માટે “Preview link” પસંદ કરો.\n⬆️ જો લિંક પ્રીવ્યૂ લોડ થવામાં નિષ્ફળ જાય, તો પણ તમે આ પ્રકારની લિંકને સપોર્ટ કરતા પ્રદાતા સાથે URL દ્વારા શોધી શકો છો.\n⬆️ જો એન્જિન “Upload only” ચિહ્નિત થયેલ હોય, તો તે જ પ્રદાતા સાથે તપાસ કરવા માટે ઇમેજ સાચવો અને “Choose file” પર ક્લિક કરો.\n\nપરિણામોમાં શું જોવું\n⭐ સમાન ફોટો દર્શાવતા પૃષ્ઠો પર પૃષ્ઠની તારીખો, કૅપ્શન્સ અને ક્રેડિટ્સ ચકાસીને છબીનો સ્રોત શોધો.\n⭐ પ્રકાશક અથવા સર્જકને ક્રેડિટ પાછી અનુસરો અને તેઓ ચિત્રનું વર્ણન, તારીખ અને પ્રસ્તુતિ કેવી રીતે કરે છે તે તપાસો.\n⭐ ઘણા મેળ ખાતા પૃષ્ઠો અને સૂચિઓ પર નકલોના પરિમાણોની તુલના કરીને ઉચ્ચ-રીઝોલ્યુશન છબી શોધો.\n⭐ સમાન છબીઓ શોધો અને તપાસો કે તેમાં એ જ વસ્તુ છે, તસવીર અલગ રીતે કાપેલી છે કે બીજા ખૂણેથી લેવાઈ છે.\n⭐ બીજા પ્રદાતાનો પ્રયાસ કરો જો પરિણામોનો પ્રથમ સેટ ખૂબ ઓછા મેળ બતાવે અથવા તમને રસ હોય તેવી વિગતો ચૂકી જાય.\n⭐ સાચવેલા ફોટા, સૂચિ ચિત્ર અથવા કાપેલા સ્ક્રીનશૉટમાંથી આઇટમ સાથે મેળ કરવા માટે છબી દ્વારા ઉત્પાદન શોધનો ઉપયોગ કરો.\n⭐ તમે જેની પાછળ છો તે ચોક્કસ આઇટમમાંથી નજીકનો મેળ કહેવા માટે વિક્રેતાઓમાં ઉત્પાદનના આકાર અને પેટર્નની તુલના કરો.\n⭐ છબીનો ફરીથી ઉપયોગ ક્યાં થયો તે જુઓ. દરેક પ્રકાશકે ચિત્ર કેવી રીતે રજૂ કર્યું તે તપાસવા માટે તારીખો અને કૅપ્શન્સની તુલના કરો.\n\nપ્રદાતાઓને શું મોકલવામાં આવે છે\nℹ️ જ્યારે તમે શોધ ચલાવો છો, ત્યારે ઇનપુટના આધારે તમારા પસંદ કરેલા પ્રદાતાઓને છબી અથવા તેનું URL પ્રાપ્ત થાય છે.\nℹ️ પ્રદાતા માટે ફાઇલ તૈયાર કરતી વખતે એક્સટેન્શન તમારા બ્રાઉઝરમાં અસ્થાયી રૂપે સંગ્રહિત કરી શકે છે.\nℹ️ સીધી ઇમેજ લિંકનું પૂર્વાવલોકન તમે તમારી શોધ શરૂ કરો તે પહેલાં તેને સેવા આપતી સાઇટનો સંપર્ક કરી શકો છો.\nℹ️ દરેક પ્રદાતા તમારા ઇનપુટને તેના પોતાના નિયમો હેઠળ હેન્ડલ કરે છે. તમે ફાઇલ મોકલો તે પહેલાં પૂર્વાવલોકન તપાસો.\n\nChrome માં પ્રારંભ કરો\n▶️ તમારા ટૂલબાર પર આ એક્સ્ટેંશનને પિન કરવા માટે Chrome માં ઉમેરો પસંદ કરો અને એક્સ્ટેંશન મેનૂ ખોલો.\n▶️ તમારા પોતાના ફોટા સાથે આ એક્સ્ટેંશનને અજમાવવા માટે બાજુની પેનલ ખોલો અને સાચવેલી છબી મૂકો.\n▶️ બે પ્રદાતાઓ પસંદ કરો અને તમારી પ્રથમ શોધથી ખુલતા ટેબમાં પરિણામોની તુલના કરો."
+  },
+  "extensionName": {
+    "message": "ફોટો દ્વારા શોધ"
+  },
+  "extensionDescription": {
+    "message": "Chromeમાં ફોટો પર જમણું ક્લિક કરો અથવા સ્ક્રીનશૉટ વાપરો. ૧૦ સર્ચ એન્જિનમાં સમાન તસવીરો શોધો અને સરખાવો."
+  },
+  "engineName_bing": {
+    "message": "Bing"
+  },
+  "engineName_yandex": {
+    "message": "Yandex"
+  },
+  "engineName_baidu": {
+    "message": "Baidu"
+  },
+  "engineName_tineye": {
+    "message": "TinEye"
+  },
+  "engineName_sogou": {
+    "message": "Sogou"
+  },
+  "engineName_whatanime": {
+    "message": "trace.moe"
+  },
+  "engineName_saucenao": {
+    "message": "SauceNAO"
+  },
+  "engineName_iqdb": {
+    "message": "IQDB"
+  },
+  "engineName_ascii2d": {
+    "message": "Ascii2d"
+  },
+  "engineName_getty": {
+    "message": "Getty"
+  },
+  "engineName_istock": {
+    "message": "iStock"
+  },
+  "engineName_shutterstock": {
+    "message": "Shutterstock"
+  },
+  "engineName_adobestock": {
+    "message": "Adobe Stock"
+  },
+  "engineName_depositphotos": {
+    "message": "Depositphotos"
+  },
+  "engineName_pinterest": {
+    "message": "Pinterest"
+  },
+  "engineName_qihoo": {
+    "message": "360 Search"
+  },
+  "engineName_taobao": {
+    "message": "Taobao"
+  },
+  "engineName_alibabaChina": {
+    "message": "Alibaba China"
+  },
+  "engineName_dreamstime": {
+    "message": "Dreamstime"
+  },
+  "engineName_alamy": {
+    "message": "Alamy"
+  },
+  "engineName_123rf": {
+    "message": "123RF"
+  },
+  "engineName_esearch": {
+    "message": "eSearch plus"
+  },
+  "engineName_tmview": {
+    "message": "TMview"
+  },
+  "engineName_branddb": {
+    "message": "Global Brand Database"
+  },
+  "engineName_madridMonitor": {
+    "message": "Madrid Monitor"
+  },
+  "engineName_auTrademark": {
+    "message": "Australian Trade Mark Search"
+  },
+  "engineName_auDesign": {
+    "message": "Australian Design Search"
+  },
+  "engineName_nzTrademark": {
+    "message": "IPONZ Trade Mark Check"
+  },
+  "engineName_jpDesign": {
+    "message": "Graphic Image Park"
+  },
+  "engineName_pimeyes": {
+    "message": "PimEyes"
+  },
+  "engineName_stocksy": {
+    "message": "Stocksy United"
+  },
+  "engineName_pond5": {
+    "message": "Pond5"
+  },
+  "engineName_pixta": {
+    "message": "PIXTA"
+  },
+  "engineName_ikea": {
+    "message": "IKEA"
+  },
+  "engineName_repostSleuth": {
+    "message": "Reddit Repost Sleuth"
+  },
+  "engineName_shein": {
+    "message": "SHEIN"
+  },
+  "engineName_lykdat": {
+    "message": "LykDat"
+  },
+  "engineName_wildberries": {
+    "message": "Wildberries"
+  },
+  "engineName_googleLens": {
+    "message": "Google Lens"
+  },
+  "engineName_lexica": {
+    "message": "Lexica"
+  },
+  "engineName_kagi": {
+    "message": "Kagi"
+  },
+  "engineName_freepik": {
+    "message": "Freepik"
+  },
+  "engineName_icons8": {
+    "message": "Icons8"
+  },
+  "engineName_googleImages": {
+    "message": "Google Images (deprecated)"
+  },
+  "engineName_unsplash": {
+    "message": "Unsplash"
+  },
+  "engineName_vcg": {
+    "message": "VCG"
+  },
+  "engineName_allEngines": {
+    "message": "all search engines"
+  },
+  "actionTitle_allEngines": {
+    "message": "Search all engines for image"
+  },
+  "actionTitle_engine": {
+    "message": "Search $ENGINE$ for image",
+    "placeholders": {
+      "engine": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
+  "menuItemTitle_bing": {
+    "message": "Bing"
+  },
+  "menuItemTitle_yandex": {
+    "message": "Yandex"
+  },
+  "menuItemTitle_baidu": {
+    "message": "Baidu"
+  },
+  "menuItemTitle_tineye": {
+    "message": "TinEye"
+  },
+  "menuItemTitle_sogou": {
+    "message": "Sogou"
+  },
+  "menuItemTitle_whatanime": {
+    "message": "trace.moe"
+  },
+  "menuItemTitle_saucenao": {
+    "message": "SauceNAO"
+  },
+  "menuItemTitle_iqdb": {
+    "message": "IQDB"
+  },
+  "menuItemTitle_ascii2d": {
+    "message": "Ascii2d"
+  },
+  "menuItemTitle_getty": {
+    "message": "Getty"
+  },
+  "menuItemTitle_istock": {
+    "message": "iStock"
+  },
+  "menuItemTitle_shutterstock": {
+    "message": "Shutterstock"
+  },
+  "menuItemTitle_adobestock": {
+    "message": "Adobe Stock"
+  },
+  "menuItemTitle_depositphotos": {
+    "message": "Depositphotos"
+  },
+  "menuItemTitle_pinterest": {
+    "message": "Pinterest"
+  },
+  "menuItemTitle_qihoo": {
+    "message": "360 Search"
+  },
+  "menuItemTitle_taobao": {
+    "message": "Taobao"
+  },
+  "menuItemTitle_alibabaChina": {
+    "message": "Alibaba China"
+  },
+  "menuItemTitle_dreamstime": {
+    "message": "Dreamstime"
+  },
+  "menuItemTitle_alamy": {
+    "message": "Alamy"
+  },
+  "menuItemTitle_123rf": {
+    "message": "123RF"
+  },
+  "menuItemTitle_esearch": {
+    "message": "eSearch plus"
+  },
+  "menuItemTitle_tmview": {
+    "message": "TMview"
+  },
+  "menuItemTitle_branddb": {
+    "message": "Global Brand Database"
+  },
+  "menuItemTitle_madridMonitor": {
+    "message": "Madrid Monitor"
+  },
+  "menuItemTitle_auTrademark": {
+    "message": "Australian Trade Mark Search"
+  },
+  "menuItemTitle_auDesign": {
+    "message": "Australian Design Search"
+  },
+  "menuItemTitle_nzTrademark": {
+    "message": "IPONZ Trade Mark Check"
+  },
+  "menuItemTitle_jpDesign": {
+    "message": "Graphic Image Park"
+  },
+  "menuItemTitle_pimeyes": {
+    "message": "PimEyes"
+  },
+  "menuItemTitle_stocksy": {
+    "message": "Stocksy United"
+  },
+  "menuItemTitle_pond5": {
+    "message": "Pond5"
+  },
+  "menuItemTitle_pixta": {
+    "message": "PIXTA"
+  },
+  "menuItemTitle_ikea": {
+    "message": "IKEA"
+  },
+  "menuItemTitle_repostSleuth": {
+    "message": "Reddit Repost Sleuth"
+  },
+  "menuItemTitle_shein": {
+    "message": "SHEIN"
+  },
+  "menuItemTitle_lykdat": {
+    "message": "LykDat"
+  },
+  "menuItemTitle_wildberries": {
+    "message": "Wildberries"
+  },
+  "menuItemTitle_googleLens": {
+    "message": "Google Lens"
+  },
+  "menuItemTitle_lexica": {
+    "message": "Lexica"
+  },
+  "menuItemTitle_kagi": {
+    "message": "Kagi"
+  },
+  "menuItemTitle_freepik": {
+    "message": "Freepik"
+  },
+  "menuItemTitle_icons8": {
+    "message": "Icons8"
+  },
+  "menuItemTitle_googleImages": {
+    "message": "Google Images (deprecated)"
+  },
+  "menuItemTitle_unsplash": {
+    "message": "Unsplash"
+  },
+  "menuItemTitle_vcg": {
+    "message": "VCG"
+  },
+  "menuItemTitle_allEngines": {
+    "message": "All enabled engines",
+    "description": "Title of the menu item."
+  },
+  "menuItemTitle_viewImage": {
+    "message": "Open image"
+  },
+  "menuItemTitle_shareImage": {
+    "message": "Share image"
+  },
+  "mainMenuItemTitle_allEngines": {
+    "message": "Search image with all enabled engines",
+    "description": "Title of the menu item."
+  },
+  "mainMenuItemTitle_engine": {
+    "message": "Search $ENGINE$ for image",
+    "placeholders": {
+      "engine": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
+  "optionSectionTitle_engines": {
+    "message": "Search engines"
+  },
+  "optionSectionDescription_engines": {
+    "message": "Toggle search engines and customize their order (drag and drop)"
+  },
+  "optionTitle_bing": {
+    "message": "Bing Images"
+  },
+  "optionTitle_yandex": {
+    "message": "Yandex.Images"
+  },
+  "optionTitle_baidu": {
+    "message": "Baidu Image Search"
+  },
+  "optionTitle_tineye": {
+    "message": "TinEye Reverse Image Search"
+  },
+  "optionTitle_sogou": {
+    "message": "Sogou Images"
+  },
+  "optionTitle_whatanime": {
+    "message": "trace.moe"
+  },
+  "optionTitle_saucenao": {
+    "message": "SauceNAO"
+  },
+  "optionTitle_iqdb": {
+    "message": "IQDB"
+  },
+  "optionTitle_ascii2d": {
+    "message": "Ascii2d"
+  },
+  "optionTitle_getty": {
+    "message": "Getty Images"
+  },
+  "optionTitle_istock": {
+    "message": "iStock"
+  },
+  "optionTitle_shutterstock": {
+    "message": "Shutterstock"
+  },
+  "optionTitle_adobestock": {
+    "message": "Adobe Stock"
+  },
+  "optionTitle_depositphotos": {
+    "message": "Depositphotos"
+  },
+  "optionTitle_pinterest": {
+    "message": "Pinterest"
+  },
+  "optionTitle_qihoo": {
+    "message": "360 Search"
+  },
+  "optionTitle_taobao": {
+    "message": "Taobao"
+  },
+  "optionTitle_alibabaChina": {
+    "message": "Alibaba China"
+  },
+  "optionTitle_dreamstime": {
+    "message": "Dreamstime"
+  },
+  "optionTitle_alamy": {
+    "message": "Alamy"
+  },
+  "optionTitle_123rf": {
+    "message": "123RF"
+  },
+  "optionTitle_esearch": {
+    "message": "eSearch plus"
+  },
+  "optionTitle_tmview": {
+    "message": "TMview"
+  },
+  "optionTitle_branddb": {
+    "message": "Global Brand Database"
+  },
+  "optionTitle_madridMonitor": {
+    "message": "Madrid Monitor"
+  },
+  "optionTitle_auTrademark": {
+    "message": "Australian Trade Mark Search"
+  },
+  "optionTitle_auDesign": {
+    "message": "Australian Design Search"
+  },
+  "optionTitle_nzTrademark": {
+    "message": "IPONZ Trade Mark Check"
+  },
+  "optionTitle_jpDesign": {
+    "message": "Graphic Image Park"
+  },
+  "optionTitle_pimeyes": {
+    "message": "PimEyes"
+  },
+  "optionTitle_stocksy": {
+    "message": "Stocksy United"
+  },
+  "optionTitle_pond5": {
+    "message": "Pond5"
+  },
+  "optionTitle_pixta": {
+    "message": "PIXTA"
+  },
+  "optionTitle_ikea": {
+    "message": "IKEA"
+  },
+  "optionTitle_repostSleuth": {
+    "message": "Reddit Repost Sleuth"
+  },
+  "optionTitle_shein": {
+    "message": "SHEIN"
+  },
+  "optionTitle_lykdat": {
+    "message": "LykDat"
+  },
+  "optionTitle_wildberries": {
+    "message": "Wildberries"
+  },
+  "optionTitle_googleLens": {
+    "message": "Google Lens"
+  },
+  "optionTitle_lexica": {
+    "message": "Lexica"
+  },
+  "optionTitle_kagi": {
+    "message": "Kagi Search"
+  },
+  "optionTitle_freepik": {
+    "message": "Freepik"
+  },
+  "optionTitle_icons8": {
+    "message": "Icons8"
+  },
+  "optionTitle_googleImages": {
+    "message": "Google Images (deprecated)"
+  },
+  "optionTitle_unsplash": {
+    "message": "Unsplash"
+  },
+  "optionTitle_vcg": {
+    "message": "VCG"
+  },
+  "optionTitle_searchMode": {
+    "message": "Search mode"
+  },
+  "optionTitle_searchAllEngines": {
+    "message": "Search all engines"
+  },
+  "optionSectionTitle_contextmenu": {
+    "message": "Context menu"
+  },
+  "optionValue_searchAllEnginesContextMenu_main": {
+    "message": "All enabled engines",
+    "description": "Value of the option."
+  },
+  "optionValue_searchAllEnginesContextMenu_sub": {
+    "message": "Choose or search all",
+    "description": "Value of the option."
+  },
+  "optionValue_searchAllEnginesContextMenu_false": {
+    "message": "Engine choices only",
+    "description": "Value of the option."
+  },
+  "optionTitle_showInContextMenu": {
+    "message": "Show in context menu"
+  },
+  "optionValue_searchModeContextMenu_selectUrl": {
+    "message": "Use image URL",
+    "description": "Value of the option."
+  },
+  "optionValue_searchModeContextMenu_selectImage": {
+    "message": "Upload image",
+    "description": "Value of the option."
+  },
+  "optionValue_searchModeContextMenu_capture": {
+    "message": "Capture an area",
+    "description": "Value of the option."
+  },
+  "optionTitle_viewImageContextMenu": {
+    "message": "Open images"
+  },
+  "optionTitle_shareImageContextMenu": {
+    "message": "Share images"
+  },
+  "optionSectionTitle_toolbar": {
+    "message": "Browser toolbar"
+  },
+  "optionSectionTitleMobile_toolbar": {
+    "message": "Browser menu"
+  },
+  "optionValue_searchAllEnginesAction_main": {
+    "message": "From browser toolbar"
+  },
+  "optionValue_searchAllEnginesAction_sub": {
+    "message": "From browser toolbar popup"
+  },
+  "optionValue_searchAllEnginesAction_false": {
+    "message": "Disable"
+  },
+  "optionValue_searchAllEnginesActionMobile_main": {
+    "message": "From browser menu"
+  },
+  "optionValue_searchAllEnginesActionMobile_sub": {
+    "message": "From browser menu popup"
+  },
+  "optionValue_searchAllEnginesActionMobile_false": {
+    "message": "Disable"
+  },
+  "optionValue_action_searchModeAction_selectUrl": {
+    "message": "Select URL"
+  },
+  "optionValue_action_searchModeAction_selectImage": {
+    "message": "Select image"
+  },
+  "optionValue_action_searchModeAction_capture": {
+    "message": "Capture"
+  },
+  "optionValue_action_searchModeAction_browse": {
+    "message": "Browse"
+  },
+  "optionValue_action_searchModeAction_url": {
+    "message": "URL"
+  },
+  "optionValue_searchModeAction_selectUrl": {
+    "message": "Select URL"
+  },
+  "optionValue_searchModeAction_selectImage": {
+    "message": "Select image"
+  },
+  "optionValue_searchModeAction_capture": {
+    "message": "Capture"
+  },
+  "optionValue_searchModeAction_browse": {
+    "message": "Upload image",
+    "description": "Value of the option."
+  },
+  "optionValue_searchModeAction_url": {
+    "message": "Image URL",
+    "description": "Value of the option."
+  },
+  "optionTitle_autoPasteAction": {
+    "message": "Detect images from clipboard"
+  },
+  "optionSectionTitle_misc": {
+    "message": "Miscellaneous"
+  },
+  "optionTitle_tabInBackgound": {
+    "message": "Open new tabs in the background"
+  },
+  "optionTitle_appTheme": {
+    "message": "Theme"
+  },
+  "optionValue_appTheme_auto": {
+    "message": "System default"
+  },
+  "optionValue_appTheme_light": {
+    "message": "Light"
+  },
+  "optionValue_appTheme_dark": {
+    "message": "Dark"
+  },
+  "optionTitle_showEngineIcons": {
+    "message": "Show search engine icons"
+  },
+  "optionTitle_localGoogle": {
+    "message": "Use local Google site"
+  },
+  "optionTitle_imgFullParse": {
+    "message": "Use deep search when selecting images"
+  },
+  "optionTitle_detectAltImageDimension": {
+    "message": "Detect alternative image sizes"
+  },
+  "optionTitle_bypassImageHostBlocking": {
+    "message": "Bypass image host blocking"
+  },
+  "optionTitle_convertSharedImage": {
+    "message": "Convert shared images"
+  },
+  "optionTitle_viewImageUseViewer": {
+    "message": "Always open images in the viewer"
+  },
+  "optionTitle_confirmPaste": {
+    "message": "Confirm images from clipboard"
+  },
+  "dialogTitle_imageConfirmation": {
+    "message": "Select an image"
+  },
+  "dialogTitle_permissionNeeded": {
+    "message": "Permission needed"
+  },
+  "dialogText_CanvasAccessNeeded": {
+    "message": "Allow $ENGINE$ to access your canvas image data to search with an image. The permission can be managed from the browser's address bar.",
+    "placeholders": {
+      "engine": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
+  "snackbarMessage_imageSelection": {
+    "message": "Select an image"
+  },
+  "snackbarMessage_imageCapture": {
+    "message": "Select an area"
+  },
+  "buttonLabel_cancel": {
+    "message": "Cancel"
+  },
+  "buttonLabel_close": {
+    "message": "Close"
+  },
+  "buttonLabel_browse": {
+    "message": "Browse"
+  },
+  "buttonLabel_paste": {
+    "message": "Paste"
+  },
+  "buttonLabel_search": {
+    "message": "Search"
+  },
+  "buttonTooltip_viewImage": {
+    "message": "Open image"
+  },
+  "buttonTooltip_shareImage": {
+    "message": "Share image"
+  },
+  "buttonTooltip_menu": {
+    "message": "Menu"
+  },
+  "buttonTooltip_searchMode": {
+    "message": "Search mode"
+  },
+  "buttonTooltip_options": {
+    "message": "Options"
+  },
+  "buttonTooltip_pin": {
+    "message": "Pin"
+  },
+  "buttonTooltip_unpin": {
+    "message": "Unpin"
+  },
+  "buttonTooltip_clearImage": {
+    "message": "Clear images"
+  },
+  "buttonTooltip_copyImageUrl": {
+    "message": "Copy image URL"
+  },
+  "buttonTooltip_close": {
+    "message": "Close"
+  },
+  "buttonTooltip_viewPage": {
+    "message": "Open page"
+  },
+  "pageContent_browse": {
+    "message": "Select images"
+  },
+  "pageContent_browse_drag": {
+    "message": "Drag images here"
+  },
+  "pageContent_browse_drop": {
+    "message": "Drop images here"
+  },
+  "pageContent_largest_image": {
+    "message": "Largest image"
+  },
+  "pageContent_widest_image": {
+    "message": "Widest image"
+  },
+  "pageContent_tallest_image": {
+    "message": "Tallest image"
+  },
+  "inputPlaceholder_imageUrl": {
+    "message": "Image URL"
+  },
+  "pageTitle": {
+    "message": "$PAGETITLE$ - $EXTENSIONNAME$",
+    "placeholders": {
+      "pageTitle": {
+        "content": "$1",
+        "example": "Options"
+      },
+      "extensionName": {
+        "content": "$2",
+        "example": "Extension Name"
+      }
+    }
+  },
+  "pageTitle_options": {
+    "message": "Options"
+  },
+  "pageTitle_browse": {
+    "message": "Browse"
+  },
+  "pageTitle_view": {
+    "message": "Image"
+  },
+  "actionMenu_viewImage": {
+    "message": "Open image"
+  },
+  "actionMenu_shareImage": {
+    "message": "Share image"
+  },
+  "actionMenu_options": {
+    "message": "Options"
+  },
+  "error_invalidPageUrl": {
+    "message": "The page URL is not valid."
+  },
+  "error_sessionExpired": {
+    "message": "The session has expired."
+  },
+  "error_sessionExpiredEngine": {
+    "message": "The session has expired. Try searching again for the image on $ENGINE$.",
+    "placeholders": {
+      "engine": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
+  "error_invalidImageSize": {
+    "message": "The uploaded image is too large. $ENGINE$ accepts images up to $SIZE$ in size.",
+    "placeholders": {
+      "engine": {
+        "content": "$1",
+        "example": "Google"
+      },
+      "size": {
+        "content": "$2",
+        "example": "10 MB"
+      }
+    }
+  },
+  "unit_mb": {
+    "message": "$VALUE$ MB",
+    "placeholders": {
+      "value": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "error_invalidImageUrl": {
+    "message": "The image URL is not valid."
+  },
+  "error_invalidImageUrl_fileUrl": {
+    "message": "Searching for images loaded from local file URLs is not supported."
+  },
+  "error_invalidSearchMode_url": {
+    "message": "Searching for image URLs is only supported from the browser toolbar popup. Visit the extension's options to select a different search mode."
+  },
+  "error_invalidSearchModeMobile_url": {
+    "message": "Searching for image URLs is only supported from the browser menu popup. Visit the extension's options to select a different search mode."
+  },
+  "error_invalidImageFile": {
+    "message": "The selected items are not images."
+  },
+  "error_invalidImageCount": {
+    "message": "Select fewer images. Up to three images can be uploaded at once."
+  },
+  "error_engine": {
+    "message": "Something went wrong. Searching on $ENGINE$ has failed.",
+    "placeholders": {
+      "engine": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
+  "error_scriptsNotAllowed": {
+    "message": "Content scripts are not allowed on this page."
+  },
+  "error_imageNotFound": {
+    "message": "No image found. Try searching again by selecting an image."
+  },
+  "error_imageShareNotSupported": {
+    "message": "The selected image cannot be shared."
+  },
+  "error_invalidSearchMethod": {
+    "message": "The selected search engine does not support the current search method."
+  },
+  "error_invalidCaptureArea": {
+    "message": "Select a page area to capture before searching."
+  },
+  "error_allEnginesDisabled": {
+    "message": "All search engines have been disabled. Visit the extensions's options to enable a search engine."
+  },
+  "error_noSearchEngineAccess": {
+    "message": "Cannot access search page results. Visit Menu > Extensions and enable the \"Allow access to search page results\" option for the extension."
+  },
+  "error_optionsNotApplied": {
+    "message": "Restart the browser for changes to take effect."
+  },
+  "error_noClipboardReadAccess": {
+    "message": "Cannot get data from the clipboard."
+  },
+  "error_noClipboardWriteAccess": {
+    "message": "Cannot add data to the clipboard."
+  },
+  "error_noCanvasAccess": {
+    "message": "Cannot access canvas data. Try searching again and allow $ENGINE$ to access your canvas image data.",
+    "placeholders": {
+      "engine": {
+        "content": "$1",
+        "example": "Google"
+      }
+    }
+  },
+  "error_pageParseError": {
+    "message": "Something went wrong. The web page could not be parsed."
+  },
+  "error_internalError": {
+    "message": "Something went wrong. Open the browser console for more details."
+  }
+}

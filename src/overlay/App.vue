@@ -1,7 +1,9 @@
 <template>
   <vn-app>
     <vn-dialog
+      class="ui-dialog"
       v-model="showDialog"
+      :aria-label="dialogTitle"
       content-class="overlay-dialog__content"
       transition="scale-transition"
       scrollable
@@ -19,9 +21,9 @@
         <vn-divider :class="separatorClasses"></vn-divider>
 
         <vn-card-actions>
-          <vn-button @click="onCancel" variant="tonal">
+          <button type="button" class="ui-button ui-quiet" @click="onCancel">
             {{ getText('buttonLabel_close') }}
-          </vn-button>
+          </button>
         </vn-card-actions>
       </vn-card>
     </vn-dialog>
@@ -31,7 +33,6 @@
 <script>
 import {
   App,
-  Button,
   Card,
   CardActions,
   CardText,
@@ -46,7 +47,6 @@ import {getText} from 'utils/common';
 export default {
   components: {
     [App.name]: App,
-    [Button.name]: Button,
     [Card.name]: Card,
     [CardActions.name]: CardActions,
     [CardText.name]: CardText,
@@ -140,10 +140,12 @@ export default {
 
         this.dialogTitle = message.dialogTitle;
         this.dialogText = message.dialogText;
+        document.title = this.dialogTitle;
       }
     },
 
     init: async function () {
+      document.documentElement.lang = browser.i18n.getUILanguage() || 'en';
       if (this.$env.isFirefox) {
         browser.runtime.onMessage.addListener(this.onMessage);
 
@@ -227,36 +229,15 @@ export default {
     transform-origin: center center !important;
 
     width: initial !important;
-    max-width: initial !important;
+    max-width: calc(100% - 24px) !important;
     max-height: calc(100% - 32px) !important;
 
     & .vn-card {
-      @include vueton.theme-prop(background-color, menu-surface);
-
       & .vn-divider {
         opacity: 0;
         transition: none;
       }
 
-      & .vn-card-title {
-        padding-bottom: 16px !important;
-      }
-
-      & .vn-card-text {
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
-      }
-
-      & .vn-card-actions {
-        padding-top: 16px !important;
-        padding-bottom: 16px !important;
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-
-        & .vn-button {
-          @include vueton.theme-prop(color, primary);
-        }
-      }
     }
   }
 }

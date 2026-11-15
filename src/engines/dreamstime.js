@@ -37,8 +37,11 @@ async function search({session, search, image, storageIds} = {}) {
 }
 
 async function engineAccess() {
-  if (document.querySelector('body > div.px-captcha-error-container')) {
-    return false;
+  if (
+    document.querySelector('.px-captcha-error-container, #px-captcha') ||
+    document.title === 'Dreamstime is loading ...'
+  ) {
+    return 'error_engineVerification';
   }
 
   return true;

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import {exec} from 'node:child_process';
-import {lstat, readdir, readFile, writeFile, rm} from 'node:fs/promises';
+import {copyFile, lstat, readdir, readFile, rm} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 
 import {series, parallel, src, dest} from 'gulp';
@@ -20,14 +20,14 @@ const __dirname = import.meta.dirname;
 const jsonMerge = require('gulp-merge-json');
 
 const {
-  default: {name: appName, version: appVersion}
+  default: {version: appVersion}
 } = await import('./package.json', {with: {type: 'json'}});
 
 const targetEnv = process.env.TARGET_ENV || 'chrome';
 const isProduction = process.env.NODE_ENV === 'production';
-const enableContributions =
-  (process.env.ENABLE_CONTRIBUTIONS || 'true') === 'true';
-const enableSponsors = (process.env.ENABLE_SPONSORS || 'true') === 'true';
+// PNG optimization is optional; skipping it keeps the same pixels and allows
+// production builds where the optional optipng binary is unavailable.
+const optimizePng = isProduction && process.env.SKIP_PNG_OPTIMIZATION !== 'true';
 
 const mv3 = ['chrome', 'edge', 'opera', 'safari'].includes(targetEnv);
 
@@ -62,9 +62,6 @@ function html() {
     htmlSrc.push('!src/background/*.html');
   }
 
-  if (!enableContributions) {
-    htmlSrc.push('!src/contribute/*.html');
-  }
 
   return src(htmlSrc, {base: '.'})
     .pipe(gulpif(isProduction, htmlmin({collapseWhitespace: true})))
@@ -87,17 +84,18 @@ function css() {
 async function images(done) {
   await ensureDir(path.join(distDir, 'src/assets/icons/app'));
   const appIconSvg = await readFile('src/assets/icons/app/icon.svg');
+  const {width: appIconWidth} = await sharp(appIconSvg).metadata();
   const appIconSizes = [16, 19, 24, 32, 38, 48, 64, 96, 128];
   if (targetEnv === 'safari') {
     appIconSizes.push(256, 512, 1024);
   }
   for (const size of appIconSizes) {
-    await sharp(appIconSvg, {density: (72 * size) / 24})
+    await sharp(appIconSvg, {density: Math.max(72, (72 * size) / appIconWidth)})
       .resize(size)
       .toFile(path.join(distDir, `src/assets/icons/app/icon-${size}.png`));
   }
 
-  if (isProduction) {
+  if (optimizePng) {
     await new Promise(resolve => {
       src(path.join(distDir, 'src/assets/icons/app/*.png'), {
         base: '.',
@@ -123,7 +121,7 @@ async function images(done) {
           .toFile(path.join(distDir, `${pngPath.slice(0, -4)}-${size}.png`));
       }
     }
-    if (isProduction) {
+    if (optimizePng) {
       await new Promise(resolve => {
         src(path.join(distDir, 'src/assets/icons/engines/*.png'), {
           base: '.',
@@ -138,10 +136,7 @@ async function images(done) {
   }
 
   await new Promise(resolve => {
-    let sources = 'app|engines|misc';
-    if (enableSponsors) {
-      sources += '|sponsors';
-    }
+    const sources = 'app|engines|misc';
 
     src(`src/assets/icons/@(${sources})/*.@(png|svg)`, {
       base: '.',
@@ -153,18 +148,6 @@ async function images(done) {
       .on('finish', resolve);
   });
 
-  if (enableContributions) {
-    await new Promise(resolve => {
-      src(
-        'node_modules/vueton/components/contribute/assets/*.@(png|webp|svg)',
-        {encoding: false}
-      )
-        .pipe(gulpif(isProduction, imagemin([svgo()])))
-        .pipe(dest(path.join(distDir, 'src/contribute/assets')))
-        .on('error', done)
-        .on('finish', resolve);
-    });
-  }
 }
 
 async function fonts(done) {
@@ -201,6 +184,9 @@ async function locale(done) {
 
   for (const localeDir of localeDirs) {
     const localePath = path.join(localesRootDir, localeDir);
+    // Keep the shared Hebrew source catalog while using Chrome's locale code.
+    const outputLocale =
+      targetEnv === 'chrome' && localeDir === 'iw' ? 'he' : localeDir;
     await new Promise(resolve => {
       src(
         [
@@ -225,10 +211,20 @@ async function locale(done) {
           })
         )
         .pipe(gulpif(isProduction, jsonmin()))
-        .pipe(dest(path.join(distDir, '_locales', localeDir)))
+        .pipe(dest(path.join(distDir, '_locales', outputLocale)))
         .on('error', done)
         .on('finish', resolve);
     });
+  }
+
+  if (targetEnv === 'chrome') {
+    // The Store lists Norwegian as "no", while Chrome can load Bokmål as "nb".
+    const localeRoot = path.join(distDir, '_locales');
+    await ensureDir(path.join(localeRoot, 'nb'));
+    await copyFile(
+      path.join(localeRoot, 'no', 'messages.json'),
+      path.join(localeRoot, 'nb', 'messages.json')
+    );
   }
 }
 
@@ -247,33 +243,8 @@ function manifest() {
     .pipe(dest(distDir));
 }
 
-async function license(done) {
-  let year = '2017';
-  const currentYear = new Date().getFullYear().toString();
-  if (year !== currentYear) {
-    year = `${year}-${currentYear}`;
-  }
-
-  let notice = `Search by Image
-Copyright (c) ${year} Armin Sebastian
-`;
-
-  if (['safari', 'samsung'].includes(targetEnv)) {
-    await writeFile(path.join(distDir, 'NOTICE'), notice);
-  } else {
-    notice = `${notice}
-This software is released under the terms of the GNU General Public License v3.0.
-See the LICENSE file for further information.
-`;
-    await writeFile(path.join(distDir, 'NOTICE'), notice);
-
-    await new Promise(resolve => {
-      src('LICENSE')
-        .pipe(dest(distDir))
-        .on('error', done)
-        .on('finish', resolve);
-    });
-  }
+function license() {
+  return src(['LICENSE', 'NOTICE']).pipe(dest(distDir));
 }
 
 function checkEnv(done) {
@@ -282,11 +253,7 @@ function checkEnv(done) {
 
     console.log(`
 The current CPU architecture (${process.arch}) is not supported.
-
-Please consult the provided build instructions, or follow the online guide.
-
-https://github.com/dessant/${appName}/wiki/Building-the-extension-on-Ubuntu
-https://github.com/dessant/${appName}/wiki/Building-the-extension-on-Windows
+See README.md for build instructions.
 `);
 
     process.exit(1);

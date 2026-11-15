@@ -51,8 +51,12 @@ async function search({session, search, image, storageIds} = {}) {
 }
 
 async function engineAccess() {
-  if (window.location.pathname.startsWith('/signin')) {
-    return false;
+  const path = window.location.pathname;
+  if (path.startsWith('/turnstile')) {
+    return 'error_engineVerification';
+  }
+  if (path.startsWith('/signin')) {
+    return 'error_engineSignIn';
   }
 
   return true;

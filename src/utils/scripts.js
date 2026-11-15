@@ -154,24 +154,35 @@ function lexicaOverrideEventDispatchScript() {
   };
 }
 
-function alibabaChinaPatchContextScript() {
-  const appendChildFn = Element.prototype.appendChild;
-  Element.prototype.appendChild = function (node) {
-    if (node.type === 'file') {
-      node.addEventListener('click', ev => ev.preventDefault(), {
-        capture: true,
-        once: true
-      });
+function alibabaChinaPatchContextScript(globalSearch = false) {
+  if (!globalSearch) {
+    const appendChildFn = Element.prototype.appendChild;
+    Element.prototype.appendChild = function (node) {
+      if (node.type === 'file') {
+        node.addEventListener('click', ev => ev.preventDefault(), {
+          capture: true,
+          once: true
+        });
 
-      Element.prototype.appendChild = appendChildFn;
-    }
+        Element.prototype.appendChild = appendChildFn;
+      }
 
-    return appendChildFn.apply(this, arguments);
-  };
+      return appendChildFn.apply(this, arguments);
+    };
+  }
 
   const openFn = window.open;
   window.open = function (url) {
-    if (url.includes('tab=imageSearch')) {
+    const globalSearchUrl =
+      'https://air.1688.com/kapp/1688-global/sales/search';
+    const isSearch =
+      typeof url === 'string' &&
+      (globalSearch
+        ? url === globalSearchUrl || url.startsWith(`${globalSearchUrl}?`)
+        : url.includes('tab=imageSearch'));
+
+    if (isSearch) {
+      window.open = openFn;
       window.location.replace(url);
     } else {
       return openFn.apply(this, arguments);

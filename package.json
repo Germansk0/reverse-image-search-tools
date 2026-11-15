@@ -1,16 +1,7 @@
 {
-  "name": "search-by-image",
-  "version": "8.5.4",
-  "author": "Armin Sebastian",
+  "name": "reverse-image-search-tools",
+  "version": "2.0.0",
   "license": "GPL-3.0-only",
-  "homepage": "https://github.com/dessant/search-by-image",
-  "repository": {
-    "url": "git+https://github.com/dessant/search-by-image.git",
-    "type": "git"
-  },
-  "bugs": {
-    "url": "https://github.com/dessant/search-by-image/issues"
-  },
   "type": "module",
   "scripts": {
     "_build": "cross-env NODE_ENV=development gulp build",
@@ -40,7 +31,10 @@
     "inspect": "cross-env NODE_ENV=production gulp inspect",
     "update": "ncu --dep prod,dev,peer --filterVersion '^*' --upgrade",
     "release": "commit-and-tag-version",
-    "push": "git push --follow-tags origin main"
+    "push": "git push --follow-tags origin main",
+    "test:e2e": "npm run test:e2e:all-engines && npm run test:e2e:release",
+    "test:e2e:all-engines": "cross-env FULL_ENGINE_CATALOG=true npm run build:chrome && playwright test journey.spec.js provider-adapters.spec.js",
+    "test:e2e:release": "npm run build:chrome && playwright test release-engines.spec.js panel-focus.spec.js --output=artifacts/chromium-release --reporter=list"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.10",
@@ -68,6 +62,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.29.7",
+    "@playwright/test": "1.64.1",
     "babel-loader": "^10.1.1",
     "commit-and-tag-version": "^12.7.3",
     "cross-env": "^10.1.0",

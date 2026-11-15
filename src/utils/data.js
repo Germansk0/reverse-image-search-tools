@@ -18,13 +18,11 @@ const optionKeys = [
   'viewImageContextMenu',
   'viewImageUseViewer',
   'appTheme',
-  'showContribPage',
   'showEngineIcons',
   'yandexHost',
   'pinActionToolbarViewImage',
   'pinActionToolbarShareImage',
-  'pinActionToolbarOptions',
-  'pinActionToolbarContribute'
+  'pinActionToolbarOptions'
 ];
 
 const searchUrl = browser.runtime.getURL('/src/search/index.html') + '?id={id}';
@@ -66,7 +64,10 @@ const engines = {
     }
   },
   sogou: {
-    url: {target: 'https://pic.sogou.com/ris?query={imgUrl}&flag=1&drag=0'},
+    url: {
+      target: 'https://pic.sogou.com/',
+      isExec: true
+    },
     image: {
       target: 'https://pic.sogou.com/',
       isExec: true
@@ -314,15 +315,6 @@ const engines = {
       isExec: true
     }
   },
-  lenso: {
-    url: {
-      target: 'https://lenso.ai/en/search-by-url?url={imgUrl}&utm_source=sbi'
-    },
-    image: {
-      target: 'https://lenso.ai/en?utm_source=sbi',
-      isExec: true
-    }
-  },
   googleImages: {
     url: {
       target:
@@ -378,12 +370,7 @@ const engineIconVariants = {
   tmview: ['dark'],
   pixta: ['dark'],
   freepik: ['dark'],
-  lenso: ['dark'],
   unsplash: ['dark']
-};
-
-const sponsorLogoVariants = {
-  lenso: ['dark']
 };
 
 const rasterEngineIcons = ['iqdb', 'tineye', 'whatanime', 'repostSleuth'];
@@ -608,7 +595,6 @@ const webpEngineSupport = [
   'googleLens',
   'lexica',
   'icons8',
-  'lenso',
   'googleImages',
   'unsplash'
 ];
@@ -698,7 +684,6 @@ const maxImageUploadSize = {
   kagi: {ui: Infinity},
   freepik: {ui: 60 * 1024 * 1024},
   icons8: {ui: 5 * 1024 * 1024},
-  lenso: {ui: 10 * 1024 * 1024},
   googleImages: {api: 20 * 1024 * 1024},
   unsplash: {api: Infinity, ui: 20 * 1024 * 1024},
   vcg: {ui: 50 * 1024 * 1024}
@@ -712,15 +697,7 @@ const chromeMobileUA =
 
 const chromeSbiSrc = 'Google Chrome 110.0.5481.78 (Official) Windows';
 
-const supportUrl = 'https://github.com/dessant/search-by-image/issues';
 
-const shareBridgeUrl = 'https://searchbyimage.vapps.dev/share';
-
-const sponsors = ['lenso'];
-
-const sponsorSites = {
-  lenso: 'https://go.vapps.dev/v2/sponsor/lenso'
-};
 
 export {
   optionKeys,
@@ -729,7 +706,6 @@ export {
   rasterEngineIcons,
   engineIconAlias,
   engineIconVariants,
-  sponsorLogoVariants,
   imageMimeTypes,
   imageTypeNames,
   convertImageMimeTypes,
@@ -739,9 +715,5 @@ export {
   maxImageUploadSize,
   chromeDesktopUA,
   chromeMobileUA,
-  chromeSbiSrc,
-  supportUrl,
-  shareBridgeUrl,
-  sponsors,
-  sponsorSites
+  chromeSbiSrc
 };
