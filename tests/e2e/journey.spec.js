@@ -1000,7 +1000,20 @@ test('a dropped batch with a skipped file and bulk confirmation fits a short sid
   await expect(
     panel.getByRole('img', {name: 'Preview: first.png'})
   ).toBeInViewport({ratio: 1});
-  await expectPanelToFit(panel);
+  try {
+    await expectPanelToFit(panel);
+  } catch (error) {
+    const bounds = await panel.getByRole('main').evaluate(main => {
+      const elements = [main, ...main.children, ...main.querySelectorAll('.preview-frame, .preview-thumbnails, .bulk-confirm, .bulk-confirm p, .bulk-confirm div, #sidebar-privacy')];
+      return elements.filter(node => node.getBoundingClientRect().height > 0).map(node => {
+        const css = getComputedStyle(node);
+        const box = node.getBoundingClientRect();
+        return {className: node.className, top: box.top, height: box.height, scrollTop: node.scrollTop, scrollHeight: node.scrollHeight, position: css.position, minHeight: css.minHeight, flexShrink: css.flexShrink, font: css.fontFamily, lineHeight: css.lineHeight};
+      });
+    });
+    console.log('Short panel layout:', JSON.stringify(bounds));
+    throw error;
+  }
   await screenshot(panel, testInfo, 'short-bulk-confirmation');
   await confirm.press('Escape');
   await expect(search).toBeFocused();
