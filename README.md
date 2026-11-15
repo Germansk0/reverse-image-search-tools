@@ -1,19 +1,44 @@
 # Reverse Image Search Tools
 
-Find where an image appears online, look for similar images, or identify a
-product using multiple reverse image search providers.
+Reverse Image Search Tools is a Chrome extension for reverse image search. Find where a photo appears online, look for similar images, or compare visual matches for a product.
 
 **[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/reverse-image-search-tool/hccicgceahocikgncfihpmkjamfpacpg)**
 
-## What’s in the v2.0 source
+## How it works
 
-Click the toolbar icon to open the search workspace. Choose, paste, or drop an
-image, or enter a direct image link. In supported desktop sidebars you can
-capture an area of the active page. Preview the image, choose your engines,
-and click **Search image**. Right-click a webpage image for a direct search.
+### Upload an image
 
-New installations enable and select Google Lens, Bing, Yandex, and TinEye.
-Settings also offers Baidu, Sogou, Pinterest, SauceNAO, SHEIN, and Wildberries.
+Open the Chrome side panel and click **Choose file** to upload a photo or screenshot. You can also drag in a file, paste an image from the clipboard, or enter a direct image link. Check the preview and click **Search image** when you’re ready.
+
+![An uploaded photo of a dog previewed in the Chrome side panel above the Search image button](docs/images/upload-image.png)
+
+*Preview the image before you send it to your chosen search engines.*
+
+### Capture part of a page
+
+To search by screenshot, choose **Capture area** in the side panel and draw a box around what you want to find. Click **Use capture** to bring the selected area into the search panel.
+
+![A selection drawn around an orange lamp using Capture area](docs/images/capture-area.png)
+
+*Select just the part of the page you want to look up.*
+
+### Right-click an image to search
+
+Right-click a photo on a webpage and choose **Reverse Image Search Tools**. Pick one search engine or open results from all your enabled engines in separate tabs.
+
+![The Chrome context menu showing Search all engines and four individual search options](docs/images/right-click-search.png)
+
+*Run a search directly from an image on the page.*
+
+### Choose your search engines
+
+Pick one engine for a quick lookup, or select several to compare results in separate tabs. Google Lens, Bing Visual Search, Yandex Images, and TinEye are selected by default on a fresh install.
+
+Use **Add engines** in Settings to enable Baidu, Sogou, Pinterest, SauceNAO, SHEIN, and Wildberries.
+
+![Search engine picker showing ten providers with Google Lens, Bing, Yandex, and TinEye selected](docs/images/choose-search-engines.png)
+
+*Choose which of your enabled engines to use for each search.*
 
 See the [changelog](CHANGELOG.md) for version details.
 
