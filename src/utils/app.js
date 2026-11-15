@@ -23,7 +23,6 @@ import {
   canvasToBlob,
   getPlatform,
   shareFiles,
-  getDayPrecisionEpoch,
   getExtensionDomain,
   isAndroid,
   getDarkColorSchemeQuery,
@@ -33,7 +32,7 @@ import {
 } from 'utils/common';
 import {
   targetEnv,
-  enableContributions,
+  releaseBuild,
   storageRevisions,
   appVersion,
   mv3
@@ -45,29 +44,32 @@ import {
   rasterEngineIcons,
   engineIconAlias,
   engineIconVariants,
-  sponsorLogoVariants,
   imageMimeTypes,
   imageTypeNames,
   convertImageMimeTypes,
   webpEngineSupport,
   avifEngineSupport,
   gifEngineSupport,
-  maxImageUploadSize,
-  supportUrl,
-  shareBridgeUrl,
-  sponsorSites
+  maxImageUploadSize
 } from 'utils/data';
+import {releaseEngines} from 'utils/releaseEngines';
+
+function getAvailableEngines(orderedEngines) {
+  return releaseBuild
+    ? orderedEngines.filter(engine => releaseEngines.includes(engine))
+    : orderedEngines;
+}
 
 async function getEnabledEngines(options) {
   if (typeof options === 'undefined') {
     options = await storage.get(['engines', 'disabledEngines']);
   }
-  return difference(options.engines, options.disabledEngines);
+  return difference(getAvailableEngines(options.engines), options.disabledEngines);
 }
 
 async function getSupportedEngines(image, engines, searchMode) {
   const supportedEngines = [];
-  for (const engine of engines) {
+  for (const engine of getAvailableEngines(engines)) {
     if (
       image.hasOwnProperty('imageDataUrl') ||
       (image.hasOwnProperty('imageUrl') &&
@@ -382,6 +384,7 @@ async function showPage({
   }
 
   const props = {url, index: activeTab.index + 1, active: true, getTab};
+  if (targetEnv === 'chrome') props.windowId = activeTab.windowId;
 
   if (setOpenerTab) {
     props.openerTabId = await getOpenerTabId({tab: activeTab});
@@ -390,126 +393,31 @@ async function showPage({
   return createTab(props);
 }
 
-async function autoShowContributePage({
-  minUseCount = 0, // 0-1000
-  minInstallDays = 0,
-  minLastOpenDays = 0,
-  minLastAutoOpenDays = 0,
-  action = 'auto',
-  activeTab = null
-} = {}) {
-  if (enableContributions) {
-    const options = await storage.get([
-      'showContribPage',
-      'useCount',
-      'installTime',
-      'contribPageLastOpen',
-      'contribPageLastAutoOpen'
-    ]);
-
-    const epoch = getDayPrecisionEpoch();
-
-    if (
-      options.showContribPage &&
-      options.useCount >= minUseCount &&
-      epoch - options.installTime >= minInstallDays * 86400000 &&
-      epoch - options.contribPageLastOpen >= minLastOpenDays * 86400000 &&
-      epoch - options.contribPageLastAutoOpen >= minLastAutoOpenDays * 86400000
-    ) {
-      await storage.set({
-        contribPageLastOpen: epoch,
-        contribPageLastAutoOpen: epoch
-      });
-
-      return showContributePage({
-        action,
-        updateStats: false,
-        activeTab,
-        getTab: true
-      });
+async function showOptionsPage({getTab = false, activeTab = null, reuseTab = false} = {}) {
+  const url = browser.runtime.getURL('/src/options/index.html');
+  if (reuseTab) {
+    activeTab ||= await getActiveTab({currentWindow: true});
+    if (Number.isInteger(activeTab?.windowId)) {
+      const tabs = await browser.tabs.query({windowId: activeTab.windowId});
+      const existing = tabs.find(tab => tab.url === url);
+      if (existing) {
+        try {
+          const tab = await browser.tabs.update(existing.id, {active: true});
+          return getTab ? tab : undefined;
+        } catch {
+          // The existing Settings tab may have closed during the lookup.
+        }
+      }
     }
   }
-}
 
-let useCountLastUpdate = 0;
-async function updateUseCount({
-  valueChange = 1,
-  maxUseCount = Infinity,
-  minInterval = 0
-} = {}) {
-  if (Date.now() - useCountLastUpdate >= minInterval) {
-    useCountLastUpdate = Date.now();
-
-    const {useCount} = await storage.get('useCount');
-
-    if (useCount < maxUseCount) {
-      await storage.set({useCount: useCount + valueChange});
-    } else if (useCount > maxUseCount) {
-      await storage.set({useCount: maxUseCount});
-    }
-  }
-}
-
-async function processAppUse({
-  action = 'auto',
-  activeTab = null,
-  showContribPage = true
-} = {}) {
-  await updateUseCount({
-    valueChange: 1,
-    maxUseCount: 1000
-  });
-
-  if (showContribPage) {
-    return autoShowContributePage({
-      minUseCount: 10,
-      minInstallDays: 14,
-      minLastOpenDays: 14,
-      minLastAutoOpenDays: 365,
-      activeTab,
-      action
-    });
-  }
-}
-
-async function showContributePage({
-  action = '',
-  updateStats = true,
-  getTab = false,
-  activeTab = null
-} = {}) {
-  if (updateStats) {
-    await storage.set({contribPageLastOpen: getDayPrecisionEpoch()});
-  }
-
-  let url = browser.runtime.getURL('/src/contribute/index.html');
-  if (action) {
-    url = `${url}?action=${action}`;
-  }
-
-  return showPage({url, getTab, activeTab});
-}
-
-async function showOptionsPage({getTab = false, activeTab = null} = {}) {
   // Samsung Internet 13: runtime.openOptionsPage fails.
   // runtime.openOptionsPage adds new tab at the end of the tab list.
   return showPage({
-    url: browser.runtime.getURL('/src/options/index.html'),
+    url,
     getTab,
     activeTab
   });
-}
-
-async function showSupportPage({getTab = false, activeTab = null} = {}) {
-  return showPage({url: supportUrl, getTab, activeTab});
-}
-
-async function showSponsorPage({
-  name = '',
-  getTab = false,
-  activeTab = null
-} = {}) {
-  return showPage({url: getSponsorUrl(name), getTab, activeTab});
 }
 
 async function setAppVersion() {
@@ -664,18 +572,6 @@ function getEngineMenuIcon(engine, {variant = ''} = {}) {
       16: `src/assets/icons/engines/${name}.svg`
     };
   }
-}
-
-function getSponsorUrl(name) {
-  return sponsorSites[name];
-}
-
-function getSponsorLogo(name, {variant = ''} = {}) {
-  if (variant && sponsorLogoVariants[name]?.includes(variant)) {
-    name += `-${variant}`;
-  }
-
-  return `/src/assets/icons/sponsors/${name}.svg`;
 }
 
 function handleActionEscapeKey() {
@@ -908,7 +804,12 @@ async function normalizeImage(file, {name} = {}) {
 
   let realType;
   if (chunk) {
-    ({mime: realType} = (await fileTypeFromBuffer(chunk)) || {});
+    try {
+      ({mime: realType} = (await fileTypeFromBuffer(chunk)) || {});
+    } catch {
+      // A truncated image can throw during detection. Leave the other files usable.
+      return;
+    }
   }
 
   if (realType) {
@@ -1220,8 +1121,11 @@ async function getImageElement({url, blob, query = false} = {}) {
   }
 }
 
-async function captureVisibleTabArea(area) {
-  const tabData = await browser.tabs.captureVisibleTab({format: 'png'});
+async function captureVisibleTabArea(area, windowId) {
+  const options = {format: 'png'};
+  const tabData = windowId === undefined
+    ? await browser.tabs.captureVisibleTab(options)
+    : await browser.tabs.captureVisibleTab(windowId, options);
   const img = await getImageElement({url: tabData});
 
   const {left, top, width, height, surfaceWidth} = area;
@@ -1244,7 +1148,7 @@ async function captureVisibleTabArea(area) {
   return canvasToBlob(cnv, {ctx});
 }
 
-async function captureImage(area, tabId) {
+async function captureImage(area, tabId, windowId) {
   const [surfaceWidth] = await executeScript({
     func: () => window.innerWidth,
     code: `window.innerWidth;`,
@@ -1252,7 +1156,7 @@ async function captureImage(area, tabId) {
   });
   area = {...area, surfaceWidth};
 
-  const blob = await captureVisibleTabArea(area);
+  const blob = await captureVisibleTabArea(area, windowId);
   const file = normalizeImageFileAttributes(blob);
 
   return processImage(file);
@@ -1401,16 +1305,31 @@ function getMaxImageUploadSize(engine, {target} = {}) {
   }
 }
 
-async function getFilesFromClipboard({focusNode = null} = {}) {
-  return new Promise(resolve => {
+function getClipboardFiles(data, maxFiles = Infinity) {
+  const files = Array.from(data?.files || []);
+  if (files.length) return files.slice(0, maxFiles);
+  return Array.from(data?.items || [])
+    .filter(item => item.kind === 'file')
+    .map(item => item.getAsFile())
+    .filter(Boolean)
+    .slice(0, maxFiles);
+}
+
+async function getClipboardContent({focusNode = null, maxFiles = 3, includeText = false} = {}) {
+  return new Promise((resolve, reject) => {
     const onPaste = function (ev) {
       ev.preventDefault();
       ev.stopImmediatePropagation();
       removeCallbacks();
 
-      const files = Array.prototype.slice.call(ev.clipboardData.files, 0, 3);
-
-      resolve(files.length ? files : null);
+      const data = ev.clipboardData;
+      try {
+        const files = getClipboardFiles(data, maxFiles);
+        const text = includeText && data ? data.getData('text/plain').trim() : '';
+        resolve({files, text});
+      } catch (error) {
+        reject(error);
+      }
     };
 
     const removeCallbacks = function () {
@@ -1439,8 +1358,18 @@ async function getFilesFromClipboard({focusNode = null} = {}) {
       focusNode.focus();
     }
 
-    document.execCommand('paste');
+    try {
+      document.execCommand('paste');
+    } catch (error) {
+      removeCallbacks();
+      reject(error);
+    }
   });
+}
+
+async function getFilesFromClipboard(options) {
+  const content = await getClipboardContent(options);
+  return content?.files.length ? content.files : null;
 }
 
 async function getImagesFromClipboard() {
@@ -1497,7 +1426,7 @@ function imageTypeSupport(type, engine) {
   }
 }
 
-async function isFileAccepted(file) {
+function isFileAccepted(file) {
   // Ignore files larger than 300 MB
   if (file) {
     if (file.size <= 300 * 1024 * 1024) {
@@ -1508,32 +1437,6 @@ async function isFileAccepted(file) {
   }
 
   return false;
-}
-
-async function sendBackgroundMessage(message) {
-  // Used when the message may be sent on browser start, before the background
-  // page event listener has been initialized. Response must not be falsy.
-  return new Promise((resolve, reject) => {
-    let stop;
-
-    const sendMessage = async function () {
-      const data = await browser.runtime.sendMessage(message);
-      if (data) {
-        window.clearTimeout(timeoutId);
-        resolve(data);
-      } else if (stop) {
-        reject(new Error('Background page is not ready'));
-      } else {
-        window.setTimeout(sendMessage, 30);
-      }
-    };
-
-    const timeoutId = window.setTimeout(function () {
-      stop = true;
-    }, 60000); // 1 minute
-
-    sendMessage();
-  });
 }
 
 function canShare(env) {
@@ -1549,46 +1452,6 @@ function canShare(env) {
 
 function validateId(id) {
   return uuidValidate(id);
-}
-
-async function validateShareId(shareId, {validateData = false} = {}) {
-  if (!shareId?.split('_').every(item => validateId(item))) {
-    return false;
-  }
-
-  if (validateData) {
-    const data = await sendBackgroundMessage({
-      id: 'sendNativeMessage',
-      message: {id: 'validateShareId', shareId}
-    });
-
-    return data.response?.isValid;
-  }
-
-  return true;
-}
-
-function isIncomingShareContext() {
-  if (
-    targetEnv === 'safari' &&
-    window.location.href.startsWith(shareBridgeUrl)
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-async function processIncomingShare() {
-  const shareId = window.location.hash.substring(1);
-
-  if (await validateShareId(shareId, {validateData: true})) {
-    const tabUrl = `${browser.runtime.getURL(
-      '/src/browse/index.html'
-    )}?id=${shareId}&origin=share`;
-
-    window.location.replace(tabUrl);
-  }
 }
 
 function getSrcsetUrls(srcset) {
@@ -1668,7 +1531,7 @@ function getImageUrlFromContextMenuEvent(ev) {
   }
 }
 
-async function processImageUrl(url, {session, mustDownloadUrl = false} = {}) {
+async function processImageUrl(url, {session, mustDownloadUrl = false, allowDownload = true} = {}) {
   let processedImage;
 
   if (url.startsWith('data:')) {
@@ -1696,6 +1559,7 @@ async function processImageUrl(url, {session, mustDownloadUrl = false} = {}) {
           )));
 
     if (mustDownloadUrl) {
+      if (!allowDownload) return;
       const blob = await fetchImage(url);
 
       if (blob) {
@@ -1773,10 +1637,16 @@ async function sendLargeMessage({
   messagePort,
   message,
   transferResponse = false,
-  openConnection = false
+  openConnection = false,
+  avoidReplay = false
 } = {}) {
   let messageError;
-  if (!transferResponse) {
+  // A search may already have opened tabs when a message response is lost.
+  // For that action, choose chunking up front and never replay a failed send.
+  let maxMessageSize = avoidReplay ? getMaxExtensionMessageSize() : 0;
+  let encodedMessage = avoidReplay ? JSON.stringify(message) : '';
+  const needsChunking = avoidReplay && encodedMessage.length > maxMessageSize;
+  if (!transferResponse && !needsChunking) {
     try {
       if (target === 'runtime') {
         return await browser.runtime.sendMessage(message);
@@ -1786,6 +1656,7 @@ async function sendLargeMessage({
         return messagePort.postMessage(message);
       }
     } catch (err) {
+      if (avoidReplay) throw err;
       messageError = err;
     }
   }
@@ -1794,8 +1665,8 @@ async function sendLargeMessage({
 
   // maxMessageSize is small enough to disregard size differences
   // caused by Unicode characters in encodedMessage
-  const maxMessageSize = getMaxExtensionMessageSize();
-  const encodedMessage = JSON.stringify(message);
+  if (!maxMessageSize) maxMessageSize = getMaxExtensionMessageSize();
+  if (!encodedMessage) encodedMessage = JSON.stringify(message);
 
   const transferMessage =
     Boolean(messageError) || encodedMessage.length > maxMessageSize;
@@ -2184,6 +2055,7 @@ async function getTabRevisions(tabId) {
 }
 
 export {
+  getAvailableEngines,
   getEnabledEngines,
   getSupportedEngines,
   getSearches,
@@ -2202,13 +2074,7 @@ export {
   addThemeListener,
   getOpenerTabId,
   showPage,
-  autoShowContributePage,
-  updateUseCount,
-  processAppUse,
-  showContributePage,
   showOptionsPage,
-  showSupportPage,
-  showSponsorPage,
   setAppVersion,
   isSessionStartup,
   isStartup,
@@ -2216,8 +2082,6 @@ export {
   getNetRequestRuleIds,
   getEngineIcon,
   getEngineMenuIcon,
-  getSponsorUrl,
-  getSponsorLogo,
   handleActionEscapeKey,
   isContextMenuSupported,
   checkSearchEngineAccess,
@@ -2249,17 +2113,15 @@ export {
   fetchImageFromBackgroundScript,
   getLargeImageMessage,
   getMaxImageUploadSize,
+  getClipboardContent,
+  getClipboardFiles,
   getFilesFromClipboard,
   getImagesFromClipboard,
   shareImage,
   imageTypeSupport,
   isFileAccepted,
-  sendBackgroundMessage,
   canShare,
   validateId,
-  validateShareId,
-  isIncomingShareContext,
-  processIncomingShare,
   getSrcsetUrls,
   getFormattedImageDetails,
   getFormattedImageDimension,

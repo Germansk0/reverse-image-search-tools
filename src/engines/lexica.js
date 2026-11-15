@@ -18,8 +18,15 @@ async function search({session, search, image, storageIds} = {}) {
   input.dispatchEvent(new Event('change'));
 }
 
+function engineAccess() {
+  const signUp = [...document.querySelectorAll('a[href="/login"]')].some(
+    link => link.getClientRects().length && link.textContent.trim() === 'Get started'
+  );
+  return signUp ? 'error_lexicaSubscription' : true;
+}
+
 function init() {
-  initSearch(search, engine, taskId);
+  initSearch(search, engine, taskId, {engineAccess});
 }
 
 if (runOnce('search')) {

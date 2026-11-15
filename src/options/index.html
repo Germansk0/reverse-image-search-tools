@@ -1,7 +1,8 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
+    <title>Settings · Reverse Image Search Tools</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <meta name="referrer" content="no-referrer" />
@@ -18,5 +19,11 @@
     <script src="/src/commons-ui/script.js"></script>
     <script src="script.js" defer></script>
   </head>
-  <body></body>
+  <body>
+    <main id="page-startup" class="page-startup" data-error="Couldn’t open Settings.">
+      <p role="status">Opening Settings…</p>
+      <button type="button" class="ui-button" hidden>Reload</button>
+    </main>
+    <div id="app"></div>
+  </body>
 </html>

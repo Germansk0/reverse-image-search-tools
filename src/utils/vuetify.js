@@ -1,6 +1,7 @@
 import {createVuetify} from 'vuetify';
 
 import {getAppTheme, addThemeListener} from 'utils/app';
+import './ui.css';
 
 const LightTheme = {
   dark: false,
@@ -29,6 +30,7 @@ async function configTheme(vuetify, {theme = ''} = {}) {
     }
 
     document.documentElement.style.setProperty('color-scheme', theme);
+    document.documentElement.dataset.uiTheme = theme;
     vuetify.theme.global.name.value = theme;
 
     if (dispatchChange) {

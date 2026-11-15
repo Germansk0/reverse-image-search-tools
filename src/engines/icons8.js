@@ -16,8 +16,14 @@ async function search({session, search, image, storageIds} = {}) {
   input.dispatchEvent(new Event('input'));
 }
 
+function engineAccess() {
+  return /^just a moment/i.test(document.title)
+    ? 'error_engineVerification'
+    : true;
+}
+
 function init() {
-  initSearch(search, engine, taskId, {documentVisible: true});
+  initSearch(search, engine, taskId, {engineAccess, documentVisible: true});
 }
 
 if (runOnce('search')) {

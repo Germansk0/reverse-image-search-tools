@@ -5,6 +5,7 @@ import {initStorage} from 'storage/init';
 import {isStorageReady, encodeStorageData} from 'storage/storage';
 import storage from 'storage/storage';
 import {
+  getAvailableEngines,
   getEnabledEngines,
   getSupportedEngines,
   getSearches,
@@ -25,7 +26,6 @@ import {
   sendLargeMessage,
   processLargeMessage,
   processMessageResponse,
-  processAppUse,
   setAppVersion,
   getStartupState,
   getNetRequestRuleIds,
@@ -44,7 +44,6 @@ import {
   getActiveTab,
   dataUrlToBlob,
   blobToDataUrl,
-  isAndroid,
   isMobile,
   getPlatform,
   getBrowser,
@@ -56,7 +55,8 @@ import {getScriptFunction} from 'utils/scripts';
 import {searchGoogleImages, searchPinterest} from 'utils/engines';
 import registry from 'utils/registry';
 import {optionKeys, engines, chromeMobileUA, chromeDesktopUA} from 'utils/data';
-import {targetEnv, mv3} from 'utils/config';
+import {targetEnv, mv3, releaseBuild} from 'utils/config';
+import {releaseEngines} from 'utils/releaseEngines';
 
 const queue = new Queue({concurrency: 1});
 
@@ -545,6 +545,39 @@ async function getMenuItems() {
   const enEngines = await getEnabledEngines(options);
 
   const items = [];
+  const showSeparators = !env.isSamsung;
+
+  async function appendItem(id, properties) {
+    items.push(
+      await getMenuItem({
+        id: `${id}_1`,
+        contexts,
+        documentUrlPatterns,
+        ...properties
+      })
+    );
+    if (extUrlPattern) {
+      items.push(
+        await getMenuItem({
+          id: `${id}_2`,
+          contexts: ['image'],
+          documentUrlPatterns: [extUrlPattern],
+          ...properties
+        })
+      );
+    }
+  }
+
+  if (viewEnabled) {
+    await appendItem('view', {title: getText('menuItemTitle_viewImage')});
+  }
+  if (shareEnabled) {
+    await appendItem('share', {title: getText('menuItemTitle_shareImage')});
+  }
+  // Samsung Internet leaves an interactive gap in place of a separator.
+  if (showSeparators && enEngines.length && (viewEnabled || shareEnabled)) {
+    await appendItem('sep', {type: 'separator'});
+  }
 
   if (enEngines.length === 1) {
     const engine = enEngines[0];
@@ -552,214 +585,40 @@ async function getMenuItems() {
       'mainMenuItemTitle_engine',
       getText(`menuItemTitle_${engine}`)
     );
-
-    items.push(
-      await getMenuItem({
-        id: `search_${engine}_1`,
-        title,
-        contexts,
-        documentUrlPatterns
-      })
-    );
-
-    if (extUrlPattern) {
-      items.push(
-        await getMenuItem({
-          id: `search_${engine}_2`,
-          title,
-          contexts: ['image'],
-          documentUrlPatterns: [extUrlPattern]
-        })
-      );
-    }
+    await appendItem(`search_${engine}`, {title});
   } else if (enEngines.length > 1 && searchAllEngines === 'main') {
-    const title = getText('mainMenuItemTitle_allEngines');
-
-    items.push(
-      await getMenuItem({
-        id: 'search_allEngines_1',
-        title,
-        contexts,
-        documentUrlPatterns
-      })
-    );
-
-    if (extUrlPattern) {
-      items.push(
-        await getMenuItem({
-          id: 'search_allEngines_2',
-          title,
-          contexts: ['image'],
-          documentUrlPatterns: [extUrlPattern]
-        })
-      );
-    }
+    await appendItem('search_allEngines', {
+      title: getText('mainMenuItemTitle_allEngines')
+    });
   } else if (enEngines.length > 1) {
-    let addSeparator = false;
-
-    if (viewEnabled) {
-      const title = getText('menuItemTitle_viewImage');
-
-      items.push(
-        await getMenuItem({
-          id: 'view_1',
-          title,
-          contexts,
-          documentUrlPatterns
-        })
-      );
-
-      if (extUrlPattern) {
-        items.push(
-          await getMenuItem({
-            id: 'view_2',
-            title,
-            contexts: ['image'],
-            documentUrlPatterns: [extUrlPattern]
-          })
-        );
-      }
-
-      addSeparator = true;
-    }
-
-    if (shareEnabled) {
-      const title = getText('menuItemTitle_shareImage');
-
-      items.push(
-        await getMenuItem({
-          id: 'share_1',
-          title,
-          contexts,
-          documentUrlPatterns
-        })
-      );
-
-      if (extUrlPattern) {
-        items.push(
-          await getMenuItem({
-            id: 'share_2',
-            title,
-            contexts: ['image'],
-            documentUrlPatterns: [extUrlPattern]
-          })
-        );
-      }
-
-      addSeparator = true;
-    }
-
-    if (addSeparator && !env.isSamsung) {
-      // Samsung Internet: separator not visible, creates gap that responds to input.
-      items.push(
-        await getMenuItem({
-          id: 'sep_1',
-          contexts,
-          type: 'separator',
-          documentUrlPatterns
-        })
-      );
-
-      if (extUrlPattern) {
-        items.push(
-          await getMenuItem({
-            id: 'sep_2',
-            type: 'separator',
-            contexts: ['image'],
-            documentUrlPatterns: [extUrlPattern]
-          })
-        );
-      }
-    }
-
     if (searchAllEngines === 'sub') {
-      const title = getText('menuItemTitle_allEngines');
-      const icons =
-        setIcons && getEngineMenuIcon('allEngines', {variant: theme});
+      await appendItem('search_allEngines', {
+        title: getText('menuItemTitle_allEngines'),
+        icons: setIcons && getEngineMenuIcon('allEngines', {variant: theme})
+      });
 
-      items.push(
-        await getMenuItem({
-          id: 'search_allEngines_1',
-          title,
-          contexts,
-          documentUrlPatterns,
-          icons
-        })
-      );
-
-      if (extUrlPattern) {
-        items.push(
-          await getMenuItem({
-            id: 'search_allEngines_2',
-            title,
-            contexts: ['image'],
-            documentUrlPatterns: [extUrlPattern],
-            icons
-          })
-        );
-      }
-
-      if (!env.isSamsung) {
-        // Samsung Internet: separator not visible, creates gap that responds to input.
-        items.push(
-          await getMenuItem({
-            id: 'sep_3',
-            contexts,
-            type: 'separator',
-            documentUrlPatterns
-          })
-        );
-
-        if (extUrlPattern) {
-          items.push(
-            await getMenuItem({
-              id: 'sep_4',
-              type: 'separator',
-              contexts: ['image'],
-              documentUrlPatterns: [extUrlPattern]
-            })
-          );
-        }
+      if (showSeparators) {
+        await appendItem('sep_allEngines', {type: 'separator'});
       }
     }
 
     for (const engine of enEngines) {
-      const title = getText(`menuItemTitle_${engine}`);
-      const icons = setIcons && getEngineMenuIcon(engine, {variant: theme});
-
-      items.push(
-        await getMenuItem({
-          id: `search_${engine}_1`,
-          title,
-          contexts,
-          documentUrlPatterns,
-          icons
-        })
-      );
-
-      if (extUrlPattern) {
-        items.push(
-          await getMenuItem({
-            id: `search_${engine}_2`,
-            title,
-            contexts: ['image'],
-            documentUrlPatterns: [extUrlPattern],
-            icons
-          })
-        );
-      }
+      await appendItem(`search_${engine}`, {
+        title: getText(`menuItemTitle_${engine}`),
+        icons: setIcons && getEngineMenuIcon(engine, {variant: theme})
+      });
     }
   }
 
   return items;
 }
 
-async function openContentView(message, view) {
+async function openContentView(message, view, {notifyOnUnavailable = true} = {}) {
   const tabId = message.session.sourceTabId;
 
   if (!(await hasModule({tabId, module: 'base'}))) {
-    await showNotification({messageId: 'error_scriptsNotAllowed'});
-    return;
+    if (notifyOnUnavailable) await showNotification({messageId: 'error_scriptsNotAllowed'});
+    return false;
   }
 
   if (!(await hasModule({tabId, module: 'content'}))) {
@@ -776,6 +635,59 @@ async function openContentView(message, view) {
       view
     }
   });
+  return true;
+}
+
+async function startPanelCapture({captureRequestId, tabId}, sender) {
+  if (sender.url !== browser.runtime.getURL('/src/sidepanel/index.html')) return false;
+  const tab = await browser.tabs.get(tabId);
+  if (!tab.active || !/^(https?|file):/.test(tab.url || '')) return false;
+
+  return openContentView({
+    session: {sourceTabId: tab.id, captureRequestId, capturePageUrl: tab.url}
+  }, 'capture', {notifyOnUnavailable: false});
+}
+
+async function closeCaptureView(tabId, captureRequestId, {messageView = false} = {}) {
+  await browser.tabs.sendMessage(
+    tabId, {id: 'closeView', view: 'capture', captureRequestId, messageView}, {frameId: 0}
+  ).catch(() => {});
+}
+
+async function sendPanelCaptureResult(captureRequestId, result) {
+  await browser.runtime.sendMessage({id: 'panelCaptureResult', captureRequestId, ...result}).catch(() => {});
+}
+
+async function finishPanelCapture({area, session}, tabId) {
+  const {captureRequestId, sourceTabId, capturePageUrl} = session;
+  if (tabId !== sourceTabId) return;
+  await closeCaptureView(tabId, captureRequestId);
+
+  let result = {error: true};
+  let tabChanged = false;
+  const tab = await browser.tabs.get(tabId).catch(() => null);
+  if (tab?.active && tab.url === capturePageUrl) {
+    const onActivated = info => {
+      if (info.windowId === tab.windowId && info.tabId !== tabId) tabChanged = true;
+    };
+    browser.tabs.onActivated.addListener(onActivated);
+    try {
+      const image = await captureImage(area, tabId, tab.windowId);
+      const current = await browser.tabs.get(tabId);
+      if (image?.imageDataUrl && !tabChanged && current.active &&
+          current.windowId === tab.windowId && current.url === capturePageUrl) {
+        const storageId = await registry.addStorageItem(image, {
+          area: 'memory', expiryTime: 1, receipts: {expected: 1, received: 0}
+        });
+        result = {storageId};
+      }
+    } catch (error) {
+      console.warn('Could not capture the selected area', error);
+    } finally {
+      browser.tabs.onActivated.removeListener(onActivated);
+    }
+  }
+  await sendPanelCaptureResult(captureRequestId, result);
 }
 
 async function showContentSelectionPointer(tabId) {
@@ -837,7 +749,7 @@ async function getTabUrl(session, search, image, taskId) {
   }
 
   if (engine === 'googleLens' && !session.options.localGoogle) {
-    tabUrl = `${tabUrl}?gws_rd=cr&gl=US`;
+    tabUrl = `${tabUrl}${tabUrl.includes('?') ? '&' : '?'}gws_rd=cr&gl=US`;
   } else if (engine === 'yandex') {
     const host =
       session.options.yandexHost === 'yandex_com' ? 'yandex.com' : 'yandex.ru';
@@ -858,28 +770,39 @@ async function initSearch(session, images) {
 
   const tab = await browser.tabs.get(session.sourceTabId);
   session.sourceTabIndex = tab.index;
+  session.sourceWindowId = tab.windowId;
 
+  const summary = {openedCount: 0, failed: [], unsupported: []};
+  const resultTabs = [];
   let firstBatchItem = true;
   for (const image of images) {
-    await searchImage(session, image, firstBatchItem);
+    const result = await searchImage(session, image, firstBatchItem);
+    summary.openedCount += result.openedCount;
+    summary.failed.push(...result.failed);
+    summary.unsupported.push(...result.unsupported);
+    resultTabs.push(...result.tabs);
     firstBatchItem = false;
   }
+
+  if (resultTabs.length > 1 && resultTabs.length === summary.openedCount &&
+      resultTabs.every(resultTab => resultTab.windowId === tab.windowId) &&
+      typeof browser.tabs.group === 'function') {
+    try {
+      await browser.tabs.group({
+        tabIds: resultTabs.map(resultTab => resultTab.id),
+        createProperties: {windowId: tab.windowId}
+      });
+      summary.grouped = true;
+    } catch (error) {
+      console.warn('Could not group the search result tabs', error);
+    }
+  }
+  if (resultTabs.length) summary.resultTabIds = resultTabs.map(tab => tab.id);
+  return summary;
 }
 
 async function searchImage(session, image, firstBatchItem = true) {
   let tabActive = firstBatchItem;
-
-  let contributePageTabId;
-
-  if (firstBatchItem) {
-    const contribPageTab = await processAppUse();
-
-    if (contribPageTab) {
-      contributePageTabId = contribPageTab.id;
-      session.sourceTabIndex = contribPageTab.index;
-      tabActive = false;
-    }
-  }
 
   tabActive = !session.options.tabInBackgound && tabActive;
 
@@ -891,11 +814,12 @@ async function searchImage(session, image, firstBatchItem = true) {
   const unsupportedEngines = session.engines.filter(
     item => !supportedEngines.includes(item)
   );
-  if (unsupportedEngines.length) {
+  const result = {openedCount: 0, failed: [], unsupported: unsupportedEngines, tabs: []};
+  if (unsupportedEngines.length && !session.inlineFeedback) {
     await showNotification({
       messageId: 'error_invalidSearchMethod',
       type: 'unsupportedError'
-    });
+    }).catch(() => {});
   }
 
   const searches = await getSearches(
@@ -910,32 +834,53 @@ async function searchImage(session, image, firstBatchItem = true) {
 
   let altImage, altImageId;
   if (altReceiptSearches.length) {
-    altImage = await convertProcessedImage(image, {newType: 'image/png'});
-
-    if (altImage) {
-      altImageId = await registry.addStorageItem(altImage, {
-        receipts: {expected: altReceiptSearches.length, received: 0},
-        expiryTime: 10.0,
-        area: imageStorageArea
-      });
+    try {
+      altImage = await convertProcessedImage(image, {newType: 'image/png'});
+      if (altImage) {
+        altImageId = await registry.addStorageItem(altImage, {
+          receipts: {expected: altReceiptSearches.length, received: 0},
+          expiryTime: 10.0,
+          area: imageStorageArea
+        });
+      }
+    } catch (error) {
+      console.warn('Could not prepare a converted image', error);
     }
   }
 
-  const receiptSearches = searches.filter(
-    item => item.sendsReceipt && (!altImageId || !item.isAltImage)
+  // Never report a converted-image search as opened when preparation failed.
+  // Other engines can still use the original image.
+  let runnableSearches = searches.filter(item => {
+    if (item.isAltImage && !altImageId) {
+      result.failed.push(item.engine);
+      return false;
+    }
+    return true;
+  });
+  const receiptSearches = runnableSearches.filter(
+    item => item.sendsReceipt && !item.isAltImage
   );
 
   let imageId;
   if (receiptSearches.length) {
-    imageId = await registry.addStorageItem(image, {
-      receipts: {expected: receiptSearches.length, received: 0},
-      expiryTime: 10.0,
-      area: imageStorageArea
-    });
+    try {
+      imageId = await registry.addStorageItem(image, {
+        receipts: {expected: receiptSearches.length, received: 0},
+        expiryTime: 10.0,
+        area: imageStorageArea
+      });
+    } catch (error) {
+      console.warn('Could not prepare the original image', error);
+    }
+    if (!imageId) {
+      const unavailable = new Set(receiptSearches);
+      result.failed.push(...receiptSearches.map(item => item.engine));
+      runnableSearches = runnableSearches.filter(item => !unavailable.has(item));
+    }
   }
 
   let firstEngine = firstBatchItem;
-  for (const search of searches) {
+  for (const search of runnableSearches) {
     session.sourceTabIndex += 1;
 
     let img, imgId;
@@ -947,21 +892,34 @@ async function searchImage(session, image, firstBatchItem = true) {
       imgId = imageId;
     }
 
-    await searchEngine(session, search, img, imgId, tabActive);
+    try {
+      const tab = await searchEngine(session, search, img, imgId, tabActive);
+      result.openedCount += 1;
+      if (Number.isInteger(tab?.id)) result.tabs.push(tab);
+    } catch (error) {
+      console.error(`Could not open search for ${search.engine}`, error);
+      result.failed.push(search.engine);
+      continue;
+    }
 
     if (firstEngine && session.closeSourceTab) {
-      await browser.tabs.remove(session.sourceTabId);
-      session.sourceTabId = -1;
-      session.sourceTabIndex -= 1;
+      try {
+        await browser.tabs.remove(session.sourceTabId);
+        session.sourceTabId = -1;
+        session.sourceTabIndex -= 1;
+      } catch (error) {
+        console.warn('Could not close the source tab', error);
+      }
     }
 
     tabActive = false;
     firstEngine = false;
   }
 
-  if ((await isAndroid()) && contributePageTabId) {
-    await browser.tabs.update(contributePageTabId, {active: true});
+  if (result.failed.length && !session.inlineFeedback) {
+    await showNotification({messageId: 'error_internalError'}).catch(() => {});
   }
+  return result;
 }
 
 async function searchEngine(session, search, image, imageId, tabActive) {
@@ -1029,7 +987,13 @@ async function searchEngine(session, search, image, imageId, tabActive) {
     );
   }
 
-  await createTab({token, index: session.sourceTabIndex, active: tabActive});
+  return createTab({
+    token,
+    index: session.sourceTabIndex,
+    windowId: session.sourceWindowId,
+    active: tabActive,
+    getTab: session.inlineFeedback && targetEnv !== 'samsung'
+  });
 }
 
 async function setupTab(tabId, data) {
@@ -1155,29 +1119,31 @@ async function execEngine(tabId, engine, taskId) {
   await executeScript({files: [`/src/engines/${engine}/script.js`], tabId});
 }
 
-async function searchClickTarget(session) {
-  const isParseModule = await hasModule({
+async function searchClickTarget(session, {onUnavailable} = {}) {
+  const ready = await hasModule({
     tabId: session.sourceTabId,
     frameId: session.sourceFrameId,
-    module: 'parse'
+    module: 'parse',
+    insert: true
   });
 
-  if (!isParseModule) {
-    await executeScript({
-      files: ['/src/parse/script.js'],
-      tabId: session.sourceTabId,
-      frameIds: [session.sourceFrameId]
-    });
+  if (!ready) {
+    return onUnavailable
+      ? onUnavailable()
+      : showNotification({messageId: 'error_scriptsNotAllowed'});
   }
 
-  await browser.tabs.sendMessage(
-    session.sourceTabId,
-    {
-      id: 'parsePage',
-      session
-    },
-    {frameId: session.sourceFrameId}
-  );
+  try {
+    await browser.tabs.sendMessage(
+      session.sourceTabId,
+      {id: 'parsePage', session},
+      {frameId: session.sourceFrameId}
+    );
+  } catch (error) {
+    // Delivery may already have started parsing. Never replay a search here.
+    console.warn('Could not confirm page image parsing', error);
+    await showNotification({messageId: 'error_pageParseError'});
+  }
 }
 
 async function handleParseResults(session, images) {
@@ -1214,6 +1180,14 @@ async function onContextMenuItemClick(info, tab) {
   }
 
   const session = await createSession(sessionData);
+
+  if (sessionType === 'search') {
+    const enabled = await getEnabledEngines(session.options);
+    if (!enabled.length || session.engines.some(item => !enabled.includes(item))) {
+      await showNotification({messageId: enabled.length ? 'error_searchEngineDisabled' : 'error_allEnginesDisabled'});
+      return;
+    }
+  }
 
   if (sessionType === 'view') {
     if (
@@ -1265,128 +1239,82 @@ async function onContextMenuItemClick(info, tab) {
         await openContentView({session}, 'capture');
       }
     } else {
-      if (
-        !(await hasModule({
-          tabId: session.sourceTabId,
-          frameId: session.sourceFrameId,
-          module: 'base'
-        }))
-      ) {
-        let processedImage;
-
-        const url = getImageUrlFromContextMenuEvent(info);
-
-        if (url) {
-          processedImage = await processImageUrl(url, {session});
-        }
-
-        if (processedImage) {
-          await initSearch(session, processedImage);
-        } else {
-          await showNotification({messageId: 'error_scriptsNotAllowed'});
-        }
-      } else {
-        await searchClickTarget(session);
-      }
+      await searchContextImage(info, session);
     }
   }
 }
 
-async function onActionClick(session, tabUrl) {
-  if (session.searchMode === 'browse') {
-    const browseUrl = browser.runtime.getURL('/src/browse/index.html');
-    const storageId = await registry.addStorageItem(session, {
-      receipts: {expected: 1, received: 0},
-      expiryTime: 1.0
-    });
+async function searchContextImage(info, session) {
+  const url = getImageUrlFromContextMenuEvent(info);
+  if (targetEnv === 'chrome' && /^https?:/i.test(url || '') &&
+      session.searchMode === 'selectUrl' && !session.options.imgFullParse &&
+      !session.options.detectAltImageDimension) {
+    const directImage = await processImageUrl(url, {session, allowDownload: false});
+    if (directImage) return initSearch(session, directImage);
+  }
 
-    await createTab({
-      url: `${browseUrl}?id=${storageId}`,
-      index: session.sourceTabIndex + 1,
-      openerTabId: await getOpenerTabId({tabId: session.sourceTabId})
-    });
-  } else if (session.searchMode === 'capture') {
-    await openContentView({session}, 'capture');
-  } else if (['selectUrl', 'selectImage'].includes(session.searchMode)) {
-    if (
-      tabUrl.startsWith('file://') &&
-      ['safari', 'samsung'].includes(targetEnv)
-    ) {
-      await showNotification({messageId: 'error_invalidImageUrl_fileUrl'});
+  const searchNativeImage = async () => {
+    const image = url && await processImageUrl(url, {session});
+    if (image) return initSearch(session, image);
+    await showNotification({messageId: 'error_scriptsNotAllowed'});
+  };
+  if (await hasModule({tabId: session.sourceTabId, frameId: session.sourceFrameId, module: 'base'})) {
+    return searchClickTarget(session, {onUnavailable: searchNativeImage});
+  }
+  return searchNativeImage();
+}
+
+async function openSearchWorkspace(tab) {
+  const url = browser.runtime.getURL('/src/sidepanel/index.html') + '?workspace=tab';
+  const windowId = tab?.windowId;
+  const tabs = await browser.tabs.query(Number.isInteger(windowId) ? {windowId} : {currentWindow: true});
+  const existing = tabs.find(item => item.url === url || item.pendingUrl === url);
+
+  if (existing) {
+    try {
+      await browser.tabs.update(existing.id, {active: true});
       return;
-    }
-
-    await openContentView({session}, 'select');
-
-    if (await hasModule({tabId: session.sourceTabId, module: 'base'})) {
-      await showContentSelectionPointer(session.sourceTabId);
+    } catch {
+      // The workspace may have closed while the toolbar click was handled.
     }
   }
+
+  await createTab({url, windowId});
 }
 
-async function onActionButtonClick(tab) {
-  if (targetEnv === 'samsung' && (await isValidTab({tab}))) {
-    // Samsung Internet 13: browserAction.onClicked provides wrong tab index.
-    tab = await browser.tabs.get(tab.id);
+function onActionButtonClick(tab) {
+  // Sidebar APIs must be called while the toolbar gesture is still active.
+  if (browser.sidebarAction?.toggle) {
+    return browser.sidebarAction.toggle();
   }
+  if (globalThis.chrome?.sidePanel?.open && Number.isInteger(tab?.windowId)) {
+    return chrome.sidePanel.open({windowId: tab.windowId});
+  }
+  return queue.add(() => openSearchWorkspace(tab));
+}
 
+async function submitPanelSearch({images, imageUrl, searchModeOverride, selectedEngines, sourceTabId}) {
+  const rejected = {accepted: false, openedCount: 0, failed: [], unsupported: []};
+  const input = searchModeOverride === 'browse' ? images : searchModeOverride === 'url' && imageUrl
+    ? {imageUrl}
+    : null;
+  if (!input || !selectedEngines?.length) return rejected;
+
+  const tab = Number.isInteger(sourceTabId) ? await browser.tabs.get(sourceTabId) : await getActiveTab();
   const session = await createSession({
     sessionOrigin: 'action',
     sessionType: 'search',
-    sourceTabId: tab.id,
-    sourceTabIndex: tab.index
-  });
-
-  if (session.searchMode === 'url') {
-    await showNotification({
-      messageId: (await isMobile())
-        ? 'error_invalidSearchModeMobile_url'
-        : 'error_invalidSearchMode_url'
-    });
-    return;
-  }
-
-  const enabledEngines = await getEnabledEngines(session.options);
-
-  if (!enabledEngines.length) {
-    await showNotification({messageId: 'error_allEnginesDisabled'});
-    return;
-  }
-
-  if (
-    session.options.searchAllEnginesAction === 'main' &&
-    enabledEngines.length > 1
-  ) {
-    session.engineGroup = 'allEngines';
-    session.engines = enabledEngines;
-  } else {
-    session.engines.push(enabledEngines[0]);
-  }
-
-  onActionClick(session, tab.url);
-}
-
-async function onActionPopupClick(engine, images, imageUrl) {
-  const {searchModeAction} = await storage.get('searchModeAction');
-
-  const tab = await getActiveTab();
-
-  const session = await createSession({
-    sessionOrigin: 'action',
-    sessionType: 'search',
-    searchMode: searchModeAction,
+    searchMode: searchModeOverride,
     sourceTabId: tab.id,
     sourceTabIndex: tab.index,
-    engine
+    inlineFeedback: true
   });
+  const enabled = new Set(await getEnabledEngines(session.options));
+  session.engines = [...new Set(selectedEngines)].filter(item => enabled.has(item));
+  if (!session.engines.length) return rejected;
 
-  if (searchModeAction === 'browse' && images) {
-    await initSearch(session, images);
-  } else if (searchModeAction === 'url' && imageUrl) {
-    await initSearch(session, {imageUrl});
-  } else {
-    onActionClick(session, tab.url);
-  }
+  const summary = await initSearch(session, input);
+  return {accepted: summary.openedCount > 0, ...summary};
 }
 
 async function initShare() {
@@ -1450,39 +1378,11 @@ async function setContextMenu() {
 }
 
 async function setBrowserAction() {
-  const options = await storage.get([
-    'engines',
-    'disabledEngines',
-    'searchAllEnginesAction'
-  ]);
-  const enEngines = await getEnabledEngines(options);
-
   const action = mv3 ? browser.action : browser.browserAction;
-
-  if (enEngines.length === 1) {
-    action.setTitle({
-      title: getText(
-        'actionTitle_engine',
-        getText(`menuItemTitle_${enEngines[0]}`)
-      )
-    });
-    action.setPopup({popup: ''});
-    return;
-  }
-
-  if (options.searchAllEnginesAction === 'main' && enEngines.length > 1) {
-    action.setTitle({
-      title: getText('actionTitle_allEngines')
-    });
-    action.setPopup({popup: ''});
-    return;
-  }
-
-  action.setTitle({title: getText('extensionName')});
-  if (!enEngines.length) {
-    action.setPopup({popup: ''});
-  } else {
-    action.setPopup({popup: '/src/action/index.html'});
+  await action.setPopup({popup: ''});
+  await action.setTitle({title: getText('extensionName')});
+  if (globalThis.chrome?.sidePanel?.setPanelBehavior) {
+    await chrome.sidePanel.setPanelBehavior({openPanelOnActionClick: true});
   }
 }
 
@@ -1508,7 +1408,18 @@ async function processMessage(request, sender) {
       },
       'overlay'
     );
+  } else if (request.id === 'startPanelCapture') {
+    return startPanelCapture(request, sender).catch(() => false);
+  } else if (request.id === 'cancelPanelCapture') {
+    if (sender.url === browser.runtime.getURL('/src/sidepanel/index.html')) {
+      await closeCaptureView(request.tabId, request.captureRequestId, {messageView: true});
+    }
   } else if (request.id === 'cancelView') {
+    if (request.view === 'capture' && request.captureRequestId) {
+      await closeCaptureView(sender.tab.id, request.captureRequestId);
+      await sendPanelCaptureResult(request.captureRequestId, {cancelled: true});
+      return;
+    }
     if (request.view === 'select') {
       hideContentSelectionPointer(sender.tab.id);
     }
@@ -1521,14 +1432,13 @@ async function processMessage(request, sender) {
     if (request.view === 'select') {
       hideContentSelectionPointer(sender.tab.id);
     }
-  } else if (request.id === 'actionPopupSubmit') {
-    onActionPopupClick(request.engine, request.images, request.imageUrl);
-  } else if (request.id === 'imageBrowseSubmit') {
-    const session = request.session;
-    session.sourceTabId = sender.tab.id;
-    session.sourceTabIndex = sender.tab.index;
-
-    initSearch(session, request.images);
+  } else if (request.id === 'panelSearchSubmit') {
+    try {
+      return await submitPanelSearch(request);
+    } catch (error) {
+      console.error('Could not start search', error);
+      return {accepted: false};
+    }
   } else if (request.id === 'imageSelectionSubmit') {
     hideContentSelectionPointer(sender.tab.id);
     searchClickTarget(request.session);
@@ -1546,6 +1456,10 @@ async function processMessage(request, sender) {
     }
   } else if (request.id === 'imageCaptureSubmit') {
     const tabId = sender.tab.id;
+    if (request.session.captureRequestId) {
+      await finishPanelCapture(request, tabId);
+      return;
+    }
     browser.tabs.sendMessage(
       tabId,
       {id: 'closeView', view: 'capture'},
@@ -1624,12 +1538,6 @@ async function processMessage(request, sender) {
     }
 
     browser.tabs.sendMessage(...params);
-  } else if (request.id === 'sendNativeMessage') {
-    const response = await browser.runtime.sendNativeMessage(
-      'application.id',
-      request.message
-    );
-    return Promise.resolve({response});
   } else if (request.id === 'getPlatform') {
     return getPlatform();
   } else if (request.id === 'getBrowser') {
@@ -1660,24 +1568,25 @@ async function processMessage(request, sender) {
     });
     if (taskIndex && Date.now() - taskIndex.addTime < 600000) {
       const task = await registry.getStorageItem({storageId: taskIndex.taskId});
-      if (task && task.search.isExec) {
+      if (task?.search.isExec && engines[task.search.engine] &&
+          getAvailableEngines([task.search.engine]).length) {
         execEngine(sender.tab.id, task.search.engine, taskIndex.taskId);
       }
     }
   } else if (request.id === 'optionChange') {
     await onOptionChange();
   } else if (request.id === 'searchImage') {
-    const {session, search, image} = request;
+    const {session, search, image, bookmark} = request;
     if (search.assetType === 'image') {
       image.imageBlob = dataUrlToBlob(image.imageDataUrl);
     }
 
     try {
       let data;
-      if (search.engine === 'googleImages') {
+      if (search.engine === 'googleImages' && !releaseBuild) {
         data = await searchGoogleImages({session, search, image});
       } else if (search.engine === 'pinterest') {
-        data = await searchPinterest({session, search, image});
+        data = await searchPinterest({image, bookmark});
       }
 
       return Promise.resolve({data});
@@ -1770,9 +1679,61 @@ async function onAlarm({name}) {
   }
 }
 
+async function configureExtensionPages({reason} = {}) {
+  if (!['chrome', 'edge', 'opera'].includes(targetEnv)) return;
+  if (browser.runtime.setUninstallURL) {
+    try {
+      await browser.runtime.setUninstallURL('https://reverse-image-search-tools.tilda.ws/uninstall_feedback');
+    } catch (error) {
+      console.warn('Could not set the uninstall feedback page', error);
+    }
+  }
+  if (reason === 'install') {
+    try {
+      await browser.tabs.create({url: 'http://reverse-image-search-tools.tilda.ws'});
+    } catch (error) {
+      console.warn('Could not open the welcome page', error);
+    }
+  }
+}
+
 async function onInstall(details) {
   if (['install', 'update'].includes(details.reason)) {
-    await setup({event: 'install'});
+    const {install} = await setup({event: 'install'});
+    // Reloading an unpacked extension can report an install with existing storage.
+    const freshInstall = details.reason === 'install' && install;
+    if (freshInstall) {
+      const {engines} = await storage.get('engines');
+      const defaults = new Set(['googleLens', 'bing', 'yandex', 'tineye']);
+      const orderedEngines = releaseBuild
+        ? [
+            ...releaseEngines,
+            ...engines.filter(engine => !releaseEngines.includes(engine))
+          ]
+        : engines;
+      const searchDefaults = {
+        disabledEngines: orderedEngines.filter(engine => !defaults.has(engine)),
+        sidebarEngineSelection: {mode: 'all'},
+        appTheme: 'auto',
+        searchModeAction: 'browse',
+        tabInBackgound: false,
+        imgFullParse: true,
+        detectAltImageDimension: true
+      };
+      if (releaseBuild) {
+        searchDefaults.engines = orderedEngines;
+      }
+      if (targetEnv === 'chrome') {
+        searchDefaults.searchAllEnginesContextMenu = 'sub';
+        searchDefaults.viewImageContextMenu = true;
+        searchDefaults.shareImageContextMenu = false;
+      }
+      await storage.set(searchDefaults);
+    }
+    if (freshInstall || releaseBuild) {
+      await setupUI();
+    }
+    await configureExtensionPages({reason: freshInstall ? 'install' : 'update'});
   }
 }
 
@@ -1791,11 +1752,10 @@ function addContextMenuListener() {
 }
 
 function addActionListener() {
-  if (mv3) {
-    browser.action.onClicked.addListener(onActionButtonClick);
-  } else {
-    browser.browserAction.onClicked.addListener(onActionButtonClick);
-  }
+  const action = mv3 ? browser.action : browser.browserAction;
+  action.onClicked.addListener(tab => {
+    onActionButtonClick(tab).catch(error => console.error('Could not open the search panel', error));
+  });
 }
 
 function addStorageListener() {
@@ -1875,6 +1835,8 @@ async function setup({event = ''} = {}) {
       await registry.cleanupRegistry();
     });
   }
+
+  return startup;
 }
 
 function init() {

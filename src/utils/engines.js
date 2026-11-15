@@ -122,11 +122,16 @@ async function initSearch(
   }
 
   if (documentLoad) {
-    await waitForDocumentLoad();
+    await waitForDocumentLoad({waitForResources: documentLoad !== 'dom'});
   }
 
-  if (engineAccess && !(await engineAccess())) {
-    return;
+  if (engineAccess) {
+    const access = await engineAccess();
+    if (typeof access === 'string') {
+      showEngineError({errorId: access, engine});
+      return;
+    }
+    if (!access) return;
   }
 
   const task = await browser.runtime.sendMessage({
@@ -225,7 +230,13 @@ async function searchGoogleImages({session, search, image} = {}) {
   return tabUrl;
 }
 
-async function searchPinterest({session, search, image} = {}) {
+async function searchPinterest({image, bookmark} = {}) {
+  const url = new URL('https://api.pinterest.com/v3/visual_search/extension/image/');
+  url.searchParams.set('page_size', '50');
+  if (bookmark) {
+    url.searchParams.set('bookmark', bookmark);
+  }
+
   const data = new FormData();
   data.append('image', image.imageBlob, image.imageFilename);
   data.append('x', '0');
@@ -234,34 +245,33 @@ async function searchPinterest({session, search, image} = {}) {
   data.append('h', '1');
   data.append('base_scheme', 'https');
 
-  const rsp = await fetch(
-    'https://api.pinterest.com/v3/visual_search/extension/image/',
-    {
-      referrer: '',
-      mode: 'cors',
-      method: 'PUT',
-      body: data
-    }
-  );
-
+  const rsp = await fetch(url, {
+    referrer: '',
+    mode: 'cors',
+    method: 'PUT',
+    body: data
+  });
   const response = await rsp.json();
 
   if (
-    rsp.status !== 200 ||
+    !rsp.ok ||
     response.status !== 'success' ||
-    !response.data ||
-    !response.data.length
+    !Array.isArray(response.data)
   ) {
     throw new Error('search failed');
   }
 
-  const results = response.data.map(item => ({
-    page: `https://pinterest.com/pin/${item.id}/`,
-    image: item.image_large_url,
-    text: item.description
-  }));
-
-  return results;
+  return {
+    results: response.data.map(item => ({
+      page: `https://pinterest.com/pin/${item.id}/`,
+      image: item.image_large_url,
+      text: item.description
+    })),
+    bookmark:
+      typeof response.bookmark === 'string' && response.bookmark !== bookmark
+        ? response.bookmark
+        : ''
+  };
 }
 
 class EngineError extends Error {

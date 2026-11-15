@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Reverse Image Search Tools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="no-referrer" />
+    <link
+      rel="icon"
+      href="/src/assets/icons/app/icon-64.png"
+      type="image/png"
+    />
+
+    <link href="/src/assets/fonts/roboto.css" rel="stylesheet" />
+    <link href="/src/commons-ui/style.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+
+    <script src="/src/commons-ui/script.js"></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main id="page-startup" class="page-startup" data-error="Couldn’t open the search panel.">
+      <p role="status">Opening search panel…</p>
+      <button type="button" class="ui-button" hidden>Reload</button>
+    </main>
+    <div id="app"></div>
+  </body>
+</html>

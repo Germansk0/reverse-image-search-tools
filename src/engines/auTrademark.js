@@ -37,7 +37,7 @@ async function search({session, search, image, storageIds} = {}) {
 }
 
 function init() {
-  initSearch(search, engine, taskId);
+  initSearch(search, engine, taskId, {documentLoad: 'dom'});
 }
 
 if (runOnce('search')) {

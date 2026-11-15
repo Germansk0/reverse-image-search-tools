@@ -98,8 +98,19 @@ async function search({session, search, image, storageIds} = {}) {
   }
 }
 
+function engineAccess() {
+  if (
+    document.title === 'Something went wrong' &&
+    document.body?.textContent.includes('Access Denied:')
+  ) {
+    return 'error_engineAccessDenied';
+  }
+
+  return true;
+}
+
 function init() {
-  initSearch(search, engine, taskId, {canvasAccess: true});
+  initSearch(search, engine, taskId, {engineAccess, canvasAccess: true});
 }
 
 if (runOnce('search')) {

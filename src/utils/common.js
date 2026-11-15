@@ -192,6 +192,7 @@ async function createTab({
   url = '',
   token = '',
   index = null,
+  windowId = null,
   active = true,
   openerTabId = null,
   getTab = false
@@ -204,6 +205,9 @@ async function createTab({
 
   if (index !== null) {
     props.index = index;
+  }
+  if (Number.isInteger(windowId)) {
+    props.windowId = windowId;
   }
   if (openerTabId !== null) {
     props.openerTabId = openerTabId;
@@ -236,9 +240,9 @@ function getNewTabUrl(token) {
   return `${browser.runtime.getURL('/src/tab/index.html')}?id=${token}`;
 }
 
-async function getActiveTab() {
+async function getActiveTab({currentWindow = false} = {}) {
   const [tab] = await browser.tabs.query({
-    lastFocusedWindow: true,
+    ...(currentWindow ? {currentWindow: true} : {lastFocusedWindow: true}),
     active: true
   });
   return tab;
@@ -549,7 +553,20 @@ async function processNode(
   return actionFn(node);
 }
 
-function waitForDocumentLoad() {
+function waitForDocumentLoad({waitForResources = true} = {}) {
+  if (!waitForResources) {
+    const navigation = performance.getEntriesByType('navigation')[0];
+    if (
+      document.readyState === 'complete' ||
+      navigation?.domContentLoadedEventStart > 0
+    ) {
+      return Promise.resolve();
+    }
+    return new Promise(resolve =>
+      document.addEventListener('DOMContentLoaded', resolve, {once: true})
+    );
+  }
+
   return new Promise(resolve => {
     function checkState() {
       if (document.readyState === 'complete') {

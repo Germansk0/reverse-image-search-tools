@@ -7,21 +7,14 @@ const revision = '20230415111029_add_theme_support';
 async function upgrade() {
   const changes = {
     appTheme: 'auto', // auto, light, dark
-    showContribPage: true,
     showEngineIcons: true,
-    contribPageLastAutoOpen: 0,
     pinActionToolbarViewImage: true,
     pinActionToolbarShareImage: false,
-    pinActionToolbarOptions: false,
-    pinActionToolbarContribute: true
+    pinActionToolbarOptions: false
   };
 
-  const {installTime, searchCount} = await browser.storage.local.get([
-    'installTime',
-    'searchCount'
-  ]);
+  const {installTime} = await browser.storage.local.get('installTime');
   changes.installTime = getDayPrecisionEpoch(installTime);
-  changes.useCount = searchCount;
 
   await browser.storage.local.remove([
     'searchCount',

@@ -1,11 +1,9 @@
 <template>
   <vn-app>
-    <vn-snackbar v-model="openSnackbar" :timeout="-1">
-      <vn-icon-button
-        src="/src/assets/icons/misc/close.svg"
-        :title="getText('buttonTooltip_close')"
-        @click="onCancel"
-      ></vn-icon-button>
+    <vn-snackbar class="ui-snackbar" v-model="openSnackbar" :timeout="-1">
+      <button type="button" class="ui-button ui-quiet ui-icon-button" :aria-label="getText('buttonTooltip_close')" @click="onCancel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
 
       {{ getText('snackbarMessage_imageSelection') }}
     </vn-snackbar>
@@ -13,7 +11,7 @@
 </template>
 
 <script>
-import {App, IconButton, Snackbar} from 'vueton';
+import {App, Snackbar} from 'vueton';
 
 import {validateId} from 'utils/app';
 import {getText} from 'utils/common';
@@ -21,7 +19,6 @@ import {getText} from 'utils/common';
 export default {
   components: {
     [App.name]: App,
-    [IconButton.name]: IconButton,
     [Snackbar.name]: Snackbar
   },
 
@@ -39,6 +36,8 @@ export default {
     getText,
 
     setup: async function () {
+      document.title = getText('snackbarMessage_imageSelection');
+      document.documentElement.lang = browser.i18n.getUILanguage() || 'en';
       if (this.$env.isFirefox) {
         browser.runtime.onMessage.addListener(this.onMessage);
 
@@ -115,6 +114,13 @@ export default {
       }
     },
 
+    onEscape: function (event) {
+      if (event.key !== 'Escape' || !this.openSnackbar) return;
+      event.preventDefault();
+      event.stopPropagation();
+      this.onCancel();
+    },
+
     onCancel: function () {
       this.hideSnackbar();
       browser.runtime.sendMessage({id: 'cancelView', view: 'select'});
@@ -130,7 +136,12 @@ export default {
   },
 
   mounted: function () {
+    window.addEventListener('keydown', this.onEscape, true);
     this.setup();
+  },
+
+  beforeUnmount: function () {
+    window.removeEventListener('keydown', this.onEscape, true);
   }
 };
 </script>
@@ -153,48 +164,4 @@ body,
   background: transparent !important;
 }
 
-.vn-snackbar {
-  & .v-snackbar__wrapper {
-    min-width: initial !important;
-    background-color: var(--md-ref-palette-primary30) !important;
-
-    & .v-snackbar__content {
-      font-size: 16px;
-      font-weight: 500;
-
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      padding-top: 0px;
-      padding-bottom: 0px;
-      padding-left: 4px;
-      padding-right: 32px;
-
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    & .vn-icon-button {
-      @include vueton.theme-prop(color, inverse-primary);
-
-      & .vn-icon {
-        @include vueton.theme-prop(background-color, inverse-on-surface);
-      }
-
-      & .vn-icon-button__state {
-        @include vueton.theme-prop(background-color, inverse-primary);
-      }
-    }
-  }
-}
-
-.v-theme--dark {
-  &.vn-snackbar {
-    & .v-snackbar__wrapper {
-      background-color: var(--md-ref-palette-primary80) !important;
-    }
-  }
-}
 </style>

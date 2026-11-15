@@ -1,125 +1,29 @@
-<p align="center"><img width="128" height="128" src="https://i.imgur.com/9JOpViL.png"></p>
-<h1 align="center">Search by Image</h1>
+# Reverse Image Search Tools
 
-<p align="center">
-  </br></br>
-  <a href="https://chromewebstore.google.com/detail/search-by-image/cnojnbdhbhnkbcieeekonklommdnndci">
-    <picture>
-      <source srcset="https://i.imgur.com/XBIE9pk.png" media="(prefers-color-scheme: dark)">
-      <img height="58" src="https://i.imgur.com/oGxig2F.png" alt="Chrome Web Store"></picture></a>
-  <a href="https://addons.mozilla.org/firefox/addon/search_by_image/">
-    <picture>
-      <source srcset="https://i.imgur.com/ZluoP7T.png" media="(prefers-color-scheme: dark)">
-      <img height="58" src="https://i.imgur.com/4PobQqE.png" alt="Firefox add-ons"></picture></a>
-  <a href="https://microsoftedge.microsoft.com/addons/detail/search-by-image/hckehkfhdkpmdlonmjaagiodlpjbonmc">
-    <picture>
-      <source srcset="https://i.imgur.com/Jog9cQP.png" media="(prefers-color-scheme: dark)">
-      <img height="58" src="https://i.imgur.com/aiprUt8.png" alt="Microsoft Store"></picture></a>
-  <a href="https://addons.opera.com/extensions/details/search-by-image/">
-    <picture>
-      <source srcset="https://i.imgur.com/ziehy0f.png" media="(prefers-color-scheme: dark)">
-      <img height="58" src="https://i.imgur.com/ytVATu0.png" alt="Opera add-ons"></picture></a>
-  </br></br>
-</p>
-<p align="center">
-  <a href="https://galaxystore.samsung.com/detail/dev.armin.searchbyimage">
-    <picture>
-      <source srcset="https://i.imgur.com/OyMEO0Y.png" media="(prefers-color-scheme: dark)">
-      <img height="58" src="https://i.imgur.com/Ze8z5ac.png" alt="Galaxy Store"></picture></a>
-  <a href="https://apps.apple.com/us/app/search-by-image-for-safari/id1544552106?platform=iphone">
-    <picture>
-      <source srcset="https://i.imgur.com/jljkC9V.png" media="(prefers-color-scheme: dark)">
-      <img height="58" src="https://i.imgur.com/uhzgtdR.png" alt="App Store"></picture></a>
-  <a href="https://apps.apple.com/us/app/search-by-image-for-safari/id1544552106?platform=mac">
-    <picture>
-      <source srcset="https://i.imgur.com/A8NELAl.png" media="(prefers-color-scheme: dark)">
-      <img height="58" src="https://i.imgur.com/LC92P1Y.png" alt="Mac App Store"></picture></a>
-  </br></br>
-</p>
+Find where an image appears online, look for similar images, or identify a
+product using multiple reverse image search providers.
 
-<h2 align="center">Sponsors</h2>
+Click the toolbar icon to open the search workspace. Choose, paste, or drop an
+image, or enter a direct image link. In supported desktop sidebars you can
+capture an area of the active page. Preview the image, choose your engines,
+and click **Search image**. Right-click a webpage image for a direct search.
 
-</br>
-<div align="center">
-  <a href="https://go.vapps.dev/v1/sponsor/lenso">
-    <div>
-      <picture>
-        <source srcset="https://i.imgur.com/YBkomfb.png" media="(prefers-color-scheme: dark)">
-        <img height="58" src="https://i.imgur.com/60KdpH7.png" alt="Lenso.ai"></picture>
-      <div>
-        </br>
-        <sup>Lenso.ai - Explore billions of images from all around the web.</br>
-          Search for places, people, duplicates, and more.</sup>
-      </div>
-    </div>
-  </a>
-</div>
-</br>
+New installations enable and select Google Lens, Bing, Yandex, and TinEye.
+Settings also offers Baidu, Sogou, Pinterest, SauceNAO, SHEIN, and Wildberries.
 
-## Supporting the Project
+## Build and test
 
-The continued development of Search by Image is made possible
-thanks to the support of awesome backers. If you'd like to join them,
-please consider contributing with
-[Patreon](https://go.vapps.dev/patreon?pr=search-by-image&src=repo),
-[PayPal](https://go.vapps.dev/paypal?pr=search-by-image&src=repo) or
-[Bitcoin](https://go.vapps.dev/bitcoin?pr=search-by-image&src=repo).
+Use the Node.js version in `.nvmrc` and run `npm ci` from the source directory.
+Build with `npm run build:prod:chrome`. Load `dist/chrome` through
+**Manage Extensions → Developer mode → Load unpacked**. Equivalent build
+commands are available for Edge, Firefox, Opera, Safari, and Samsung Internet.
+If the optional PNG optimizer cannot run, set `SKIP_PNG_OPTIMIZATION=true`.
 
-## Description
-
-Search by Image is a browser extension that makes effortless reverse image
-searches possible, and comes with support for more than 30 search engines.
-
-The extension helps journalists and researchers verify the authenticity
-of images, and assists in the identification of false information
-on social media. Search by Image is also popular among photographers,
-helping artists explore how their work is shared on the web, while shoppers
-find it valuable for discovering similar products at discounted prices.
-
-#### Search Engines
-
-A diverse set of reverse image search engines are supported,
-which can be toggled and reordered from the extension's options.
-Visit the wiki for the full list of supported search engines.
-
-https://github.com/dessant/search-by-image/wiki/Search-engines
-
-#### Search Modes
-
-Images positioned at the selected area are detected regardless of how they were
-embedded in the page. The extension also supports searching with images
-from your device, images from private sites, and captured areas of the page.
-
-A handful of search modes are offered that serve different use cases.
-The search mode can be set independently for the context menu
-and the browser toolbar from the extension's options.
-
-- **Select URL**: select an image on the page and search with the image URL.
-  This is the default search mode.
-- **Select image**: select an image on the page and search with the image file.
-  This search mode is preferred for sites which do not allow the direct linking
-  of images, such as private sites.
-- **Capture**: search with a captured area of the page.
-- **Browse**: search with an image from your device. Pasting images
-  from the clipboard is also supported.
-- **URL**: search with an image URL.
-
-## Screenshots
-
-<p>
-  <img width="380" src="https://i.imgur.com/8rZYKSj.png">
-  <img width="380" src="https://i.imgur.com/eJsR4NS.png">
-  <img width="380" src="https://i.imgur.com/TX67E1N.png">
-  <img width="380" src="https://i.imgur.com/khP73vH.png">
-  <img width="380" src="https://i.imgur.com/pTOmhuY.png">
-  <img width="380" src="https://i.imgur.com/C5wBhGN.png">
-  <img width="380" src="https://i.imgur.com/A1l2APz.png">
-  <img width="380" src="https://i.imgur.com/JkFq3SI.png">
-</p>
+Run logic tests with `node --test tests/*.test.js`. Install the Chromium
+Playwright browser with `npx playwright install chromium`, then run
+`npm run test:e2e` for the installed-extension tests. Provider responses in
+these tests use local fixtures.
 
 ## License
 
-Copyright (c) 2017-2026 Armin Sebastian
-
-This software is released under the terms of the GNU General Public License v3.0.
-See the [LICENSE](LICENSE) file for further information.
+See [LICENSE](LICENSE) and [NOTICE](NOTICE).

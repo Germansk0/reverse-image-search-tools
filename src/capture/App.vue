@@ -1,45 +1,40 @@
 <template>
   <vn-app :class="appClasses">
-    <div ref="canvasWrap" class="canvas-wrap">
-      <canvas id="canvas"></canvas>
+    <div class="capture-layout">
+      <div ref="canvasWrap" class="canvas-wrap">
+        <canvas id="canvas"></canvas>
+      </div>
+      <div v-if="captureOpen" class="capture-toolbar" role="group" :aria-label="getText('snackbarMessage_imageCapture')">
+        <button type="button" class="ui-button ui-quiet ui-icon-button" :aria-label="getText('buttonTooltip_close')" @click="onCancel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+        <p>{{ getText('snackbarMessage_imageCapture') }}</p>
+        <button type="button" class="ui-button ui-primary" :disabled="!hasCaptureArea" @click="onCapture">
+          {{ getText(forPanel ? 'buttonLabel_useCapture' : 'buttonLabel_search') }}
+        </button>
+      </div>
     </div>
-    <vn-snackbar v-model="openSnackbar" :timeout="-1">
-      <vn-icon-button
-        src="/src/assets/icons/misc/close.svg"
-        :title="getText('buttonTooltip_close')"
-        @click="onCancel"
-      ></vn-icon-button>
-
-      {{ getText('snackbarMessage_imageCapture') }}
-
-      <template v-slot:actions>
-        <vn-button class="capture-button" @click="onCapture" variant="tonal">
-          {{ getText('buttonLabel_search') }}
-        </vn-button>
-      </template>
-    </vn-snackbar>
   </vn-app>
 </template>
 
 <script>
 import Cropper from 'cropperjs';
-import {App, Button, IconButton, Snackbar} from 'vueton';
+import {App} from 'vueton';
 
 import {validateId} from 'utils/app';
 import {getText} from 'utils/common';
 
 export default {
   components: {
-    [App.name]: App,
-    [Button.name]: Button,
-    [IconButton.name]: IconButton,
-    [Snackbar.name]: Snackbar
+    [App.name]: App
   },
 
   data: function () {
     return {
       canvasHidden: false,
-      openSnackbar: false
+      hasCaptureArea: false,
+      forPanel: false,
+      captureOpen: false
     };
   },
 
@@ -59,6 +54,8 @@ export default {
     getText,
 
     setup: async function () {
+      document.title = getText('snackbarMessage_imageCapture');
+      document.documentElement.lang = browser.i18n.getUILanguage() || 'en';
       if (this.$env.isFirefox) {
         browser.runtime.onMessage.addListener(this.onMessage);
 
@@ -111,19 +108,31 @@ export default {
 
       if (request.id === 'openView') {
         this.$options.rawData.session = request.session;
+        this.forPanel = Boolean(request.session.captureRequestId);
         this.showCapture();
       } else if (request.id === 'closeView') {
+        if (request.captureRequestId && request.captureRequestId !== this.$options.rawData.session?.captureRequestId) return;
         this.hideCapture();
       }
     },
 
+    onEscape: function (event) {
+      if (event.key !== 'Escape' || !this.captureOpen) return;
+      event.preventDefault();
+      event.stopPropagation();
+      this.onCancel();
+    },
+
     onCancel: function () {
       this.hideCapture();
-      browser.runtime.sendMessage({id: 'cancelView', view: 'capture'});
+      browser.runtime.sendMessage({
+        id: 'cancelView', view: 'capture', captureRequestId: this.$options.rawData.session?.captureRequestId
+      });
     },
 
     onCapture: function () {
       const area = this.getCaptureArea();
+      const session = this.$options.rawData.session;
 
       if (!area.width) {
         browser.runtime.sendMessage({
@@ -138,7 +147,7 @@ export default {
         () => {
           browser.runtime.sendMessage({
             id: 'imageCaptureSubmit',
-            session: this.$options.rawData.session,
+            session,
             area
           });
         },
@@ -158,8 +167,7 @@ export default {
     },
 
     showCapture: function () {
-      this.showSnackbar();
-
+      this.captureOpen = true;
       this.canvasHidden = false;
       if (!this.cropper) {
         this.cropper = new Cropper(document.getElementById('canvas'), {
@@ -177,31 +185,32 @@ export default {
           zoomable: false,
           toggleDragModeOnDblclick: false,
           minCropBoxWidth: 1,
-          minCropBoxHeight: 1
+          minCropBoxHeight: 1,
+          crop: () => {
+            const area = this.cropper?.getCropBoxData();
+            this.hasCaptureArea = Boolean(area?.width && area.height);
+          }
         });
       }
     },
 
     hideCapture: function () {
-      this.hideSnackbar();
-
+      this.captureOpen = false;
       this.canvasHidden = true;
+      this.hasCaptureArea = false;
       if (this.cropper) {
         this.cropper.clear();
       }
-    },
-
-    showSnackbar: function () {
-      this.openSnackbar = true;
-    },
-
-    hideSnackbar: function () {
-      this.openSnackbar = false;
     }
   },
 
   mounted: function () {
+    window.addEventListener('keydown', this.onEscape, true);
     this.setup();
+  },
+
+  beforeUnmount: function () {
+    window.removeEventListener('keydown', this.onEscape, true);
   }
 };
 </script>
@@ -230,61 +239,48 @@ body {
   background: transparent !important;
 }
 
-.vn-snackbar {
-  & .v-snackbar__wrapper {
-    margin-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
-    background-color: var(--md-ref-palette-primary30) !important;
-
-    & .v-snackbar__content {
-      font-size: 16px;
-      font-weight: 500;
-
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      padding-top: 0px;
-      padding-bottom: 0px;
-      padding-left: 4px;
-      padding-right: 16px;
-
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    & .vn-icon-button {
-      @include vueton.theme-prop(color, inverse-primary);
-
-      & .vn-icon {
-        @include vueton.theme-prop(background-color, inverse-on-surface);
-      }
-
-      & .vn-icon-button__state {
-        @include vueton.theme-prop(background-color, inverse-primary);
-      }
-    }
-
-    & .capture-button {
-      padding-left: 24px;
-      padding-right: 24px;
-
-      & .v-btn__content {
-        font-size: 16px !important;
-        @include vueton.theme-prop(color, inverse-on-surface);
-      }
-
-      @include vueton.theme-prop(color, inverse-primary);
-    }
-  }
+.capture-layout {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 4px 4px calc(8px + env(safe-area-inset-bottom, 0px));
 }
 
 .canvas-wrap {
-  margin-top: 4px;
-  margin-left: 4px;
-  margin-right: 4px;
-  width: calc(100% - 4px - 4px);
-  height: calc(100% - 4px - 64px - env(safe-area-inset-bottom, 0px));
+  flex: 1;
+  min-height: 0;
+  isolation: isolate;
+}
+
+.capture-toolbar {
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  align-items: center;
+  align-self: center;
+  gap: 8px;
+  max-width: calc(100% - 8px);
+  padding: 6px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-surface-radius);
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font: 14px/1.4 var(--ui-font);
+}
+
+.capture-toolbar p {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.capture-toolbar .ui-primary {
+  flex-shrink: 0;
+  max-width: 55%;
+  overflow-wrap: anywhere;
 }
 
 .canvas-hidden .canvas-wrap {
@@ -427,12 +423,6 @@ body {
 }
 
 .v-theme--dark {
-  &.vn-snackbar {
-    & .v-snackbar__wrapper {
-      background-color: var(--md-ref-palette-primary80) !important;
-    }
-  }
-
   & .cropper-point {
     &.point-ne,
     &.point-nw,
@@ -440,17 +430,6 @@ body {
     &.point-se {
       &::after {
         color: var(--md-ref-palette-primary60);
-      }
-    }
-  }
-}
-
-/* tablets */
-@media (min-width: 480px) {
-  html {
-    & .vn-snackbar {
-      & .v-snackbar__wrapper {
-        min-width: 360px;
       }
     }
   }

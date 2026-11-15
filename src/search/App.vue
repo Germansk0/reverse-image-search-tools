@@ -1,20 +1,20 @@
 <template>
   <vn-app v-show="dataLoaded">
-    <div class="grid" v-if="results.length">
+    <div v-if="results.length" ref="grid" class="grid">
       <div
-        class="grid-item"
+        class="grid-item ui-focus"
         tabindex="0"
         @keyup.enter="openPage(index)"
-        :class="resultClasses"
+        :class="{'grid-item-loaded': index < visibleResultCount}"
         v-for="(item, index) in results"
-        :key="index"
+        :key="item.page"
       >
         <div
           class="grid-item-image-wrap"
           :title="getText('buttonTooltip_viewPage')"
           @click="openPage(index)"
         >
-          <img class="grid-item-image" :src="item.image" />
+          <img class="grid-item-image" :src="item.image" :alt="item.text || getText('buttonTooltip_viewImage')" />
         </div>
         <div class="grid-item-footer">
           <div class="grid-item-footer-text" :title="item.text">
@@ -29,28 +29,24 @@
         </div>
       </div>
     </div>
-    <div v-if="!resultsLoaded" class="page-overlay">
-      <div class="error-content" v-if="error">
-        <vn-icon
-          class="error-icon"
-          src="/src/assets/icons/misc/error.svg"
-        ></vn-icon>
-        <div class="error-text">{{ error }}</div>
-      </div>
-
-      <img
-        v-if="showSpinner && !error"
-        class="spinner"
-        src="/src/assets/icons/misc/spinner.svg"
-      />
-    </div>
+    <footer v-if="visibleResultCount" class="pinterest-results-footer">
+      <p ref="resultsCount" class="pinterest-result-count" tabindex="-1" role="status">{{ getText('pinterestResultsCount', String(visibleResultCount)) }}</p>
+      <button v-if="pinterestBookmark" ref="loadMoreButton" type="button" class="ui-button" :aria-disabled="loadingMore" @click="loadMorePinterest">
+        {{ getText(loadingMore ? 'pinterestLoadingMore' : 'pinterestLoadMore') }}
+      </button>
+      <p v-if="moreError" class="pinterest-load-error" role="status">{{ moreError }}</p>
+    </footer>
+    <main v-if="!resultsLoaded || !results.length" class="page-overlay" :class="{'is-error': error}">
+      <p role="status">{{ error || (searchPending ? getText('status_searchingImages') : resultsLoaded ? getText('pinterestNoResults') : '') }}</p>
+    </main>
   </vn-app>
 </template>
 
 <script>
+import {markRaw} from 'vue';
 import Masonry from 'masonry-layout';
 import imagesLoaded from 'imagesloaded';
-import {App, Icon, IconButton} from 'vueton';
+import {App, IconButton} from 'vueton';
 
 import {validateUrl, sendLargeMessage, showPage} from 'utils/app';
 import {getText} from 'utils/common';
@@ -63,7 +59,6 @@ import {
 export default {
   components: {
     [App.name]: App,
-    [Icon.name]: Icon,
     [IconButton.name]: IconButton
   },
 
@@ -72,25 +67,25 @@ export default {
       dataLoaded: false,
 
       error: '',
-      showSpinner: false,
+      searchPending: false,
       engine: '',
       results: [],
-      resultsLoaded: false
-    };
-  },
+      resultsLoaded: false,
+      visibleResultCount: 0,
+      masonry: null,
 
-  computed: {
-    resultClasses: function () {
-      return {
-        'grid-item-loaded': this.resultsLoaded
-      };
-    }
+      pinterestQuery: null,
+      pinterestBookmark: '',
+      loadingMore: false,
+      moreError: ''
+    };
   },
 
   methods: {
     getText,
 
     setup: async function () {
+      document.documentElement.lang = browser.i18n.getUILanguage() || 'en';
       const storageId = new URL(window.location.href).searchParams.get('id');
 
       const task = await browser.runtime.sendMessage({
@@ -101,7 +96,7 @@ export default {
       });
 
       if (task) {
-        this.showSpinner = true;
+        this.searchPending = true;
         this.dataLoaded = true;
 
         try {
@@ -167,25 +162,14 @@ export default {
 
     search: async function ({session, search, image} = {}) {
       if (this.engine === 'pinterest') {
-        if (this.$env.isSafari && this.$env.isMobile) {
-          // Safari 15: cross-origin request from extension page is blocked on mobile.
-          const rsp = await browser.runtime.sendMessage({
-            id: 'searchImage',
-            session,
-            search,
-            image
-          });
-
-          if (rsp.error) {
-            throw new Error(rsp.error);
-          }
-
-          this.results = rsp.data;
-        } else {
-          this.results = await searchPinterest({session, search, image});
+        const query = {session, search, image};
+        const page = await this.fetchPinterest(query);
+        this.appendPinterestResults(page, query);
+        if (this.results.length) {
+          await this.layoutGrid();
         }
-
-        this.layoutGrid();
+        this.searchPending = false;
+        this.resultsLoaded = true;
       } else if (this.engine === 'googleImages') {
         let tabUrl;
         if (this.$env.isSafari && this.$env.isMobile) {
@@ -212,23 +196,84 @@ export default {
       }
     },
 
-    layoutGrid: function () {
-      this.$nextTick(() => {
-        const grid = document.querySelector('.grid');
-        imagesLoaded(grid).once('always', () => {
-          const masonry = new Masonry(grid, {
-            itemSelector: '.grid-item',
-            horizontalOrder: true,
-            transitionDuration: 0,
-            initLayout: false
-          });
-          masonry.once('layoutComplete', () => {
-            this.showSpinner = false;
-            this.resultsLoaded = true;
-          });
-          masonry.layout();
+    fetchPinterest: async function ({session, search, image}, bookmark) {
+      if (this.$env.isSafari && this.$env.isMobile) {
+        // Mobile Safari blocks the request from the extension results page.
+        const rsp = await browser.runtime.sendMessage({
+          id: 'searchImage',
+          session,
+          search,
+          image,
+          bookmark
         });
-      });
+        if (rsp.error) {
+          throw new Error(rsp.error);
+        }
+        return rsp.data;
+      }
+
+      return searchPinterest({image, bookmark});
+    },
+
+    appendPinterestResults: function ({results, bookmark}, query) {
+      const seen = new Set(this.results.map(item => item.page));
+      const previousCount = this.results.length;
+      for (const item of results) {
+        if (!seen.has(item.page)) {
+          seen.add(item.page);
+          this.results.push(item);
+        }
+      }
+
+      const added = this.results.length > previousCount;
+      this.pinterestBookmark = added ? bookmark : '';
+      this.pinterestQuery = this.pinterestBookmark ? markRaw(query) : null;
+      return added;
+    },
+
+    loadMorePinterest: async function () {
+      if (this.loadingMore || !this.pinterestBookmark) {
+        return;
+      }
+
+      const buttonFocused = document.activeElement === this.$refs.loadMoreButton;
+      const firstNewIndex = this.visibleResultCount;
+      this.loadingMore = true;
+      this.moreError = '';
+      try {
+        const query = this.pinterestQuery;
+        const page = await this.fetchPinterest(query, this.pinterestBookmark);
+        if (this.appendPinterestResults(page, query)) {
+          await this.layoutGrid();
+          if (buttonFocused) this.$refs.grid.children[firstNewIndex]?.focus();
+        } else if (buttonFocused) {
+          this.$refs.resultsCount?.focus();
+        }
+      } catch (err) {
+        this.moreError = getText('pinterestLoadMoreError');
+      } finally {
+        this.loadingMore = false;
+      }
+    },
+
+    layoutGrid: async function () {
+      await this.$nextTick();
+      const grid = this.$refs.grid;
+      await new Promise(resolve => imagesLoaded(grid).once('always', resolve));
+
+      if (this.masonry) {
+        this.masonry.reloadItems();
+      } else {
+        this.masonry = markRaw(new Masonry(grid, {
+          itemSelector: '.grid-item',
+          horizontalOrder: true,
+          transitionDuration: 0,
+          initLayout: false
+        }));
+      }
+
+      this.masonry.layout();
+      this.visibleResultCount = this.results.length;
     },
 
     openPage: async function (index) {
@@ -246,6 +291,10 @@ export default {
 
   created: function () {
     this.setup();
+  },
+
+  beforeUnmount: function () {
+    this.masonry?.destroy();
   }
 };
 </script>
@@ -286,31 +335,9 @@ body,
   padding: 8px;
 }
 
-.spinner {
-  width: 36px;
-  height: 36px;
-}
-
-.error-content {
-  display: flex;
-  align-items: center;
-  margin: auto;
-  padding: 16px;
-
-  & .error-icon {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
-    margin-right: 24px;
-    @include vueton.theme-prop(background-color, error);
-  }
-
-  & .error-text {
-    @include vueton.md2-typography(subtitle1);
-    max-width: 520px;
-  }
-}
+.page-overlay p {max-width: 44ch; padding: 12px; color: var(--ui-muted); font: 14px/1.4 var(--ui-font); text-align: center}
+.page-overlay.is-error p {color: var(--ui-notice)}
+.vn-app {background: var(--ui-bg); color: var(--ui-text)}
 
 .grid {
   padding: 8px;
@@ -333,6 +360,20 @@ body,
   }
 }
 
+.pinterest-results-footer {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 12px 16px 28px;
+  font: 14px/1.4 var(--ui-font);
+}
+
+.pinterest-result-count,
+.pinterest-load-error {margin: 0}
+.pinterest-result-count {color: var(--ui-muted)}
+.pinterest-load-error {color: var(--ui-notice)}
+.pinterest-results-footer .ui-button[aria-disabled="true"] {cursor: progress}
+
 .grid-item {
   width: 120px;
   @media (min-width: 576px) {
@@ -347,10 +388,6 @@ body,
 
 .grid-item-loaded {
   opacity: 1;
-}
-
-.grid-item:focus {
-  outline: 0;
 }
 
 .grid-item::before {
