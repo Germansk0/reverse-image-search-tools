@@ -792,7 +792,7 @@ export default {
 
         if (images && images.length < files.length) {
           const skipped = files.length - images.length;
-          this.selectionNotice = `${skipped} ${skipped === 1 ? 'file was' : 'files were'} not usable and will not be searched.`;
+          this.selectionNotice = `${skipped} ${skipped === 1 ? 'file was' : 'files were'} not usable and skipped.`;
         }
 
         if (!images) {
@@ -1328,8 +1328,9 @@ html, body {
   .engine-choices {min-height: min(80px, 28vh)}
 }
 @media (max-height: 280px) {
-  .sidebar-prototype {padding-block: 4px; gap: 4px}
+  .sidebar-prototype {padding: 4px 8px; gap: 4px}
   .sidebar-prototype > .sidebar-source {--preview-min-height: 40px}
+  .bulk-confirm p {font-size: 13px}
 }
 @media (max-width: 320px) {
   .panel-header h1,
